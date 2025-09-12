@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model NotificationChannel {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // email, sms, webhook, slack
+  config      Json     // provider-specific configuration
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  notifications Notification[]
+  rules         NotificationRule[]
+
+  @@map("notification_channels")
+}
+
+model NotificationTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  type        String   // alert, report, system
+  subject     String?
+  body        String
+  variables   String[] // available template variables
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  notifications Notification[]
+
+  @@map("notification_templates")
+}
+
+model NotificationRule {
+  id          String   @id @default(cuid())
+  name        String
+  conditions  Json     // conditions for triggering
+  channels    String[] // channel IDs to use
+  priority    String   @default("medium")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  channel NotificationChannel? @relation(fields: [channelId], references: [id])
+  channelId String?
+
+  @@map("notification_rules")
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  type        String   // alert, report, system
+  title       String
+  message     String
+  recipient   String
+  channelType String
+  status      String   @default("pending") // pending, sent, failed, delivered
+  priority    String   @default("medium")
+  metadata    Json?
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  failedAt    DateTime?
+  error       String?
+  retryCount  Int      @default(0)
+  maxRetries  Int      @default(3)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  template   NotificationTemplate? @relation(fields: [templateId], references: [id])
+  templateId String?
+  channel    NotificationChannel?  @relation(fields: [channelId], references: [id])
+  channelId  String?
+
+  @@map("notifications")
+}
+
+model NotificationLog {
+  id            String   @id @default(cuid())
+  notificationId String
+  event         String   // sent, delivered, failed, opened, clicked
+  details       Json?
+  timestamp     DateTime @default(now())
+
+  @@map("notification_logs")
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String
+  serverId  String?
+  alertType String?  // specific alert types to subscribe to
+  channels  String[] // preferred notification channels
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, serverId, alertType])
+  @@map("subscriptions")
+}

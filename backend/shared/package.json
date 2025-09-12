@@ -1,0 +1,23 @@
+{
+  "name": "devops-shared",
+  "version": "1.0.0",
+  "description": "Shared utilities and types for DevOps Monitoring Platform",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.3",
+    "axios": "^1.6.0",
+    "events": "^3.3.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^24.3.1",
+    "typescript": "^5.9.2"
+  }
+}

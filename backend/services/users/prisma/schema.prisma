@@ -1,0 +1,156 @@
+// User Service Database Schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String
+  firstName String?
+  lastName  String?
+  role      UserRole @default(USER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relationships
+  teamMemberships TeamMember[]
+  createdTeams    Team[]       @relation("TeamCreator")
+  sessions        Session[]
+  activityLogs    ActivityLog[]
+  serverAccess    ServerAccess[]
+
+  @@map("users")
+}
+
+model Team {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  creatorId String
+  creator   User         @relation("TeamCreator", fields: [creatorId], references: [id])
+  members   TeamMember[]
+  servers   Server[]
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id     String   @id @default(cuid())
+  role   TeamRole @default(MEMBER)
+  joinedAt DateTime @default(now())
+
+  // Relationships
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+  teamId String
+  team   Team   @relation(fields: [teamId], references: [id])
+
+  @@unique([userId, teamId])
+  @@map("team_members")
+}
+
+model Server {
+  id          String       @id @default(cuid())
+  name        String
+  hostname    String       @unique
+  ipAddress   String
+  environment Environment  @default(DEVELOPMENT)
+  status      ServerStatus @default(ACTIVE)
+  description String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relationships
+  teamId       String
+  team         Team           @relation(fields: [teamId], references: [id])
+  serverAccess ServerAccess[]
+
+  @@map("servers")
+}
+
+model ServerAccess {
+  id          String            @id @default(cuid())
+  permissions ServerPermission[]
+  grantedAt   DateTime          @default(now())
+
+  // Relationships
+  userId   String
+  user     User   @relation(fields: [userId], references: [id])
+  serverId String
+  server   Server @relation(fields: [serverId], references: [id])
+
+  @@unique([userId, serverId])
+  @@map("server_access")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  // Relationships
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("sessions")
+}
+
+model ActivityLog {
+  id        String     @id @default(cuid())
+  action    String
+  resource  String?
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime   @default(now())
+
+  // Relationships
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("activity_logs")
+}
+
+// Enums
+enum UserRole {
+  ADMIN
+  MANAGER
+  USER
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum Environment {
+  DEVELOPMENT
+  STAGING
+  PRODUCTION
+}
+
+enum ServerStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+}
+
+enum ServerPermission {
+  READ
+  WRITE
+  ADMIN
+}

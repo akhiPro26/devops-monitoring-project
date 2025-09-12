@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model KnowledgeBase {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  source      String
+  category    String
+  tags        String[]
+  embedding   Float[]
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("knowledge_base")
+}
+
+model Prediction {
+  id          String   @id @default(cuid())
+  serverId    String
+  metricType  String
+  predictedValue Float
+  confidence  Float
+  timeframe   String
+  algorithm   String
+  features    Json
+  createdAt   DateTime @default(now())
+  
+  @@map("predictions")
+}
+
+model Recommendation {
+  id          String   @id @default(cuid())
+  serverId    String
+  type        String
+  title       String
+  description String
+  priority    String   @default("medium")
+  category    String
+  confidence  Float
+  impact      String
+  effort      String
+  status      String   @default("pending")
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("recommendations")
+}
+
+model AnalysisJob {
+  id          String   @id @default(cuid())
+  type        String
+  status      String   @default("pending")
+  serverId    String?
+  parameters  Json
+  result      Json?
+  error       String?
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@map("analysis_jobs")
+}
+
+model ChatSession {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String?
+  messages  Json[]
+  context   Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("chat_sessions")
+}
