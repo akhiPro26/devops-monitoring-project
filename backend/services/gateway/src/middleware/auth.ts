@@ -1,4 +1,4 @@
-import axios from "axios"
+import jwt from "jsonwebtoken"
 import type { Request, Response, NextFunction } from "express"
 
 export interface AuthenticatedRequest extends Request {
@@ -10,7 +10,7 @@ export interface AuthenticatedRequest extends Request {
   }
 }
 
-export const authenticateToken = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const authHeader = req.headers.authorization
     const token = authHeader && authHeader.split(" ")[1]
@@ -22,19 +22,22 @@ export const authenticateToken = async (req: AuthenticatedRequest, res: Response
       })
     }
 
-    // Verify token with user service
-    const response = await axios.get(`${process.env.USER_SERVICE_URL}/api/auth/verify`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    // ✅ Verify token using JWT secret
+    const secret = process.env.JWT_SECRET
+    if (!secret) {
+      throw new Error("JWT_SECRET not configured in environment variables")
+    }
 
-    req.user = response.data.user
+    const decoded = jwt.verify(token, secret) as AuthenticatedRequest["user"]
+
+    // Attach user to request
+    req.user = decoded
     next()
-  } catch (error) {
+  } catch (error: any) {
     return res.status(403).json({
       success: false,
       error: "Invalid or expired token",
+      details: error.message,
     })
   }
 }
