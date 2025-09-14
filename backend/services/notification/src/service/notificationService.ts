@@ -86,7 +86,7 @@ export class NotificationService {
         const templateData = {
           title: notification.title,
           message: notification.message,
-          ...notification.metadata,
+          ...(typeof notification.metadata === "object" && notification.metadata !== null ? notification.metadata : {}),
         }
 
         content = this.templateEngine.render(notification.template.body, templateData)
