@@ -12,14 +12,13 @@ import chatRoutes from "./routes/chat"
 import { startBackgroundJobs } from "./service/backgroundJobs"
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger";
-import { RequestHandler } from "express";
 
 dotenv.config()
 const app = express()
 const prisma = new PrismaClient()
 const PORT = process.env.PORT || 3003
 // @ts-ignore
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api-docs", ...swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 // Middleware

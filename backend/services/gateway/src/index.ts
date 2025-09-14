@@ -36,7 +36,7 @@ app.use(
     credentials: true,
   }),
 )
-app.use(express.json({ limit: "10mb" }))
+
 app.use(express.urlencoded({ extended: true }))
 
 // Request logging
@@ -68,10 +68,10 @@ app.use(
   "/api/auth",
   authLimiter,
   createProxyMiddleware({
-    target: process.env.USER_SERVICE_URL || "http://user-service:3001",
+    target: process.env.USER_SERVICE_URL || "http://localhost:3001",
     changeOrigin: true,
     pathRewrite: {
-      "^/api/auth": "/api/auth",
+      "^/api": "",
     },
     onError(err:any, req: Request, res: Response) {
       logger.error("User service proxy error:", { message: err.message, stack: err.stack });
@@ -81,6 +81,7 @@ app.use(
     },
   } as Options)
 );
+app.use(express.json({ limit: "10mb" }))
 
 app.use(
   "/api/users",
