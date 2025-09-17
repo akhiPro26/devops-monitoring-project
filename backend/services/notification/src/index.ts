@@ -13,14 +13,14 @@ import webhookRoutes from "./routes/webhooks"
 import { startBackgroundJobs } from "./service/backgroundJobs"
 import { initializeQueues } from "./service/queueService"
 import swaggerUi from "swagger-ui-express";
-import swaggerSpec from "./config/swagger";
+
 
 dotenv.config()
 
 const app = express()
 const prisma = new PrismaClient()
 const PORT = process.env.PORT || 3004
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Middleware
 app.use(helmet())
@@ -29,11 +29,11 @@ app.use(express.json({ limit: "10mb" }))
 app.use(express.urlencoded({ extended: true }))
 
 // Routes
-app.use("/api/notifications", notificationRoutes)
-app.use("/api/channels", channelRoutes)
-app.use("/api/templates", templateRoutes)
-app.use("/api/subscriptions", subscriptionRoutes)
-app.use("/api/webhooks", webhookRoutes)
+app.use("/notifications", notificationRoutes)
+app.use("/channels", channelRoutes)
+app.use("/templates", templateRoutes)
+app.use("/subscriptions", subscriptionRoutes)
+app.use("/webhooks", webhookRoutes)
 
 // Health check
 app.get("/health", (req, res) => {

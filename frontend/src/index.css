@@ -1,81 +1,33 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
-
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
-
-:root {
-  --background: 0 0% 100%; /* #ffffff */
-  --foreground: 210 11% 15%; /* #1f2937 */
-  --card: 210 40% 98%; /* #f8fafc */
-  --card-foreground: 215 16% 47%; /* #4b5563 */
-  --popover: 0 0% 100%; /* #ffffff */
-  --popover-foreground: 215 16% 47%; /* #4b5563 */
-  --primary: 215 28% 17%; /* #374151 */
-  --primary-foreground: 0 0% 100%; /* #ffffff */
-  --secondary: 238 84% 67%; /* #6366f1 */
-  --secondary-foreground: 0 0% 100%; /* #ffffff */
-  --muted: 210 40% 98%; /* #f8fafc */
-  --muted-foreground: 215 16% 47%; /* #4b5563 */
-  --accent: 238 84% 67%; /* #6366f1 */
-  --accent-foreground: 0 0% 100%; /* #ffffff */
-  --destructive: 24 95% 53%; /* #ea580c */
-  --destructive-foreground: 0 0% 100%; /* #ffffff */
-  --border: 220 13% 91%; /* #e5e7eb */
-  --input: 210 40% 98%; /* #f8fafc */
-  --ring: 238 84% 67% / 0.5; /* rgba(99, 102, 241, 0.5) */
-  --chart-1: 238 84% 67%; /* #6366f1 */
-  --chart-2: 45 93% 47%; /* #a16207 */
-  --chart-3: 24 95% 53%; /* #ea580c */
-  --chart-4: 215 16% 47%; /* #4b5563 */
-  --chart-5: 215 28% 17%; /* #374151 */
-  --radius: 0.5rem;
-  --sidebar: 210 40% 98%; /* #f8fafc */
-  --sidebar-foreground: 215 16% 47%; /* #4b5563 */
-  --sidebar-primary: 215 28% 17%; /* #374151 */
-  --sidebar-primary-foreground: 0 0% 100%; /* #ffffff */
-  --sidebar-accent: 238 84% 67%; /* #6366f1 */
-  --sidebar-accent-foreground: 0 0% 100%; /* #ffffff */
-  --sidebar-border: 220 13% 91%; /* #e5e7eb */
-  --sidebar-ring: 238 84% 67% / 0.5; /* rgba(99, 102, 241, 0.5) */
-}
-
-.dark {
-  --background: 210 11% 15%; /* #1f2937 */
-  --foreground: 0 0% 100%; /* #ffffff */
-  --card: 215 28% 17%; /* #374151 */
-  --card-foreground: 0 0% 100%; /* #ffffff */
-  --popover: 215 28% 17%; /* #374151 */
-  --popover-foreground: 0 0% 100%; /* #ffffff */
-  --primary: 0 0% 100%; /* #ffffff */
-  --primary-foreground: 215 28% 17%; /* #374151 */
-  --secondary: 238 84% 67%; /* #6366f1 */
-  --secondary-foreground: 0 0% 100%; /* #ffffff */
-  --muted: 215 28% 17%; /* #374151 */
-  --muted-foreground: 215 16% 47%; /* #4b5563 */
-  --accent: 238 84% 67%; /* #6366f1 */
-  --accent-foreground: 0 0% 100%; /* #ffffff */
-  --destructive: 24 95% 53%; /* #ea580c */
-  --destructive-foreground: 0 0% 100%; /* #ffffff */
-  --border: 215 28% 17%; /* #374151 */
-  --input: 215 28% 17%; /* #374151 */
-  --ring: 238 84% 67% / 0.5; /* rgba(99, 102, 241, 0.5) */
-  --sidebar: 215 28% 17%; /* #374151 */
-  --sidebar-foreground: 0 0% 100%; /* #ffffff */
-  --sidebar-primary: 238 84% 67%; /* #6366f1 */
-  --sidebar-primary-foreground: 0 0% 100%; /* #ffffff */
-  --sidebar-accent: 215 28% 17%; /* #374151 */
-  --sidebar-accent-foreground: 0 0% 100%; /* #ffffff */
-  --sidebar-border: 215 28% 17%; /* #374151 */
-  --sidebar-ring: 238 84% 67% / 0.5; /* rgba(99, 102, 241, 0.5) */
-}
-
-* {
-  border-color: hsl(var(--border));
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-  font-family: "DM Sans", sans-serif;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }

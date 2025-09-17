@@ -27,7 +27,7 @@ export const createRateLimiter = (windowMs: number, max: number, message?: strin
 // Pre-configured rate limiters
 export const authLimiter = createRateLimiter(
   100, // 15 minutes
-  15, // 5 attempts
+  150, // 5 attempts
   "Too many authentication attempts"
 )
 

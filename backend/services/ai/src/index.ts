@@ -28,10 +28,10 @@ app.use(express.json({ limit: "10mb" }))
 app.use(express.urlencoded({ extended: true }))
 
 // Routes
-app.use("/api/rag", ragRoutes)
-app.use("/api/predictions", predictionsRoutes)
-app.use("/api/recommendations", recommendationsRoutes)
-app.use("/api/chat", chatRoutes)
+app.use("/rag", ragRoutes)
+app.use("/predictions", predictionsRoutes)
+app.use("/recommendations", recommendationsRoutes)
+app.use("/chat", chatRoutes)
 
 // Health check
 app.get("/health", (req, res) => {

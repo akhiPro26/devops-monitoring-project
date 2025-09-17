@@ -32,7 +32,7 @@ const logger = winston.createLogger({
 app.use(helmet())
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
   }),
 )
@@ -81,14 +81,13 @@ app.use(
     },
   } as Options)
 );
-app.use(express.json({ limit: "10mb" }))
 
 app.use(
   "/api/users",
   apiLimiter,
   authenticateToken,
   createProxyMiddleware({
-    target: process.env.USER_SERVICE_URL || "http://user-service:3001",
+    target: process.env.USER_SERVICE_URL || "http://localhost:3001",
     changeOrigin: true,
     pathRewrite: {
       "^/api/users": "/api/users",
@@ -101,12 +100,51 @@ app.use(
     },
   } as Options)
 );
+
 app.use(
-  "/api/monitoring",
+  "/api/teams",
   apiLimiter,
   authenticateToken,
   createProxyMiddleware({
-    target: process.env.MONITORING_SERVICE_URL || "http://monitoring-service:3002",
+    target: process.env.USER_SERVICE_URL || "http://localhost:3001",
+    changeOrigin: true,
+    pathRewrite: {
+      "^/api/teams": "/teams",
+    },
+    onError(err:any, req: Request, res: Response) {
+      logger.error("User service proxy error:", { message: err.message, stack: err.stack });
+      if (!res.headersSent) {
+        res.status(503).json({ success: false, error: "User service unavailable" });
+      }
+    },
+  } as Options)
+);
+
+app.use(
+  "/api/servers",
+  apiLimiter,
+  authenticateToken,
+  createProxyMiddleware({
+    target: process.env.USER_SERVICE_URL || "http://localhost:3001",
+    changeOrigin: true,
+    pathRewrite: {
+      "^/api/servers": "/servers",   // <--- important
+    },
+    onError(err:any, req: Request, res: Response) {
+      logger.error("User service proxy error:", { message: err.message, stack: err.stack });
+      if (!res.headersSent) {
+        res.status(503).json({ success: false, error: "User service unavailable" });
+      }
+    },
+  } as Options)
+);
+
+app.use(
+  "/api/monitoring", 
+  apiLimiter,
+  authenticateToken,
+  createProxyMiddleware({
+    target: process.env.MONITORING_SERVICE_URL || "http://localhost:3002",
     changeOrigin: true,
     pathRewrite: {
       "^/api/monitoring": "/api",
@@ -125,10 +163,10 @@ app.use(
   apiLimiter,
   authenticateToken,
   createProxyMiddleware({
-    target: process.env.AI_SERVICE_URL || "http://ai-service:3003",
+    target: process.env.AI_SERVICE_URL || "http://localhost:3003",
     changeOrigin: true,
     pathRewrite: {
-      "^/api/ai": "/api",
+      "^/api/ai": "",
     },
     onError(err:any, req: Request, res: Response) {
       logger.error("AI service proxy error:", { message: err.message, stack: err.stack });
@@ -144,10 +182,10 @@ app.use(
   apiLimiter,
   authenticateToken,
   createProxyMiddleware({
-    target: process.env.NOTIFICATION_SERVICE_URL || "http://notification-service:3004",
+    target: process.env.NOTIFICATION_SERVICE_URL || "http://localhost:3004",
     changeOrigin: true,
     pathRewrite: {
-      "^/api/notifications": "/api",
+      "^/api/notifications": "",
     },
     onError(err:any, req: Request, res: Response) {
       logger.error("Notification service proxy error:", { message: err.message, stack: err.stack });
@@ -165,7 +203,7 @@ app.use(
   authenticateToken,
   requireRole(["admin"]),
   createProxyMiddleware({
-    target: process.env.USER_SERVICE_URL || "http://user-service:3001",
+    target: process.env.USER_SERVICE_URL || "http://localhost:3001",
     changeOrigin: true,
     pathRewrite: {
       "^/api/admin": "/api/admin",
@@ -195,6 +233,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
     error: "Internal server error",
   })
 })
+app.use(express.json({ limit: "10mb" }))
 
 app.listen(PORT, () => {
   logger.info(`Gateway service running on port ${PORT}`)

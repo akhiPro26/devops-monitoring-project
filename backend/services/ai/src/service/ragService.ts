@@ -68,7 +68,7 @@ export class RAGService {
       // Generate response using retrieved documents
       const contextText = documents.map((doc:any) => `${doc.title}: ${doc.content}`).join("\n\n")
 
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" })
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
       const prompt = `You are a DevOps expert assistant. Use the following context to answer questions about server monitoring, infrastructure, and best practices. If the context doesn't contain relevant information, say so.
 

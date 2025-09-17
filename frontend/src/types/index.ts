@@ -1,129 +1,180 @@
-    import { z } from "zod"
+export interface User {
+  id: string
+  email: string
+  username: string
+  firstName: string
+  lastName: string
+  role: "USER" | "ADMIN"
+  createdAt: string
+  teamMemberships?: TeamMembership[]
+}
 
-// User Types
-export const UserSchema = z.object({
-  id: z.string(),
-  email: z.string().email(),
-  username: z.string(),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  role: z.enum(["ADMIN", "MANAGER", "USER"]),
-  isActive: z.boolean(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-})
+export interface Team {
+  id: string
+  name: string
+  description: string
+  createdAt: string
+  updatedAt: string
+  creatorId: string
+  creator: {
+    id: string
+    username: string
+    email: string
+  }
+  members: TeamMember[]
+  servers: Server[]
+}
 
-export const LoginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-})
+export interface TeamMembership {
+  id: string
+  teamId: string
+  userId: string
+  role: string
+  joinedAt: string
+}
 
-export const RegisterSchema = z.object({
-  email: z.string().email(),
-  username: z.string().min(3),
-  password: z.string().min(6),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-})
+export interface TeamMember {
+  id: string
+  role: "OWNER" | "ADMIN" | "MEMBER"
+  joinedAt: string
+  userId: string
+  teamId: string
+  user: {
+    id: string
+    username: string
+    email: string
+  }
+}
 
-// Server Types
-export const ServerSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  hostname: z.string(),
-  ipAddress: z.string(),
-  port: z.number().optional(),
-  status: z.enum(["ONLINE", "OFFLINE", "UNKNOWN", "MAINTENANCE"]),
-  environment: z.enum(["DEVELOPMENT", "STAGING", "PRODUCTION"]),
-  description: z.string().optional(),
-  teamId: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-})
+export interface Server {
+  id: string
+  name: string
+  hostname: string
+  ipAddress: string
+  environment: "DEVELOPMENT" | "STAGING" | "PRODUCTION"
+  status: "ACTIVE" | "INACTIVE" | "MAINTENANCE"
+  description: string
+  createdAt: string
+  updatedAt: string
+  teamId: string
+  team: {
+    id: string
+    name: string
+  }
+  serverAccess?: {
+    permissions: string[]
+  }[]
+}
 
-// Metrics Types
-export const MetricSchema = z.object({
-  id: z.string(),
-  serverId: z.string(),
-  type: z.enum(["CPU_USAGE", "MEMORY_USAGE", "DISK_USAGE", "NETWORK_IN", "NETWORK_OUT", "LOAD_AVERAGE", "UPTIME"]),
-  value: z.number(),
-  timestamp: z.string(),
-})
+export interface Metric {
+  id: string
+  serverId: string
+  type: "CPU_USAGE" | "MEMORY_USAGE" | "DISK_USAGE" | "NETWORK_IN" | "NETWORK_OUT" | "LOAD_AVERAGE" | "UPTIME"
+  value: number
+  unit: string
+  timestamp: string
+  server: {
+    id: string
+    name: string
+    hostname: string
+  }
+}
 
-export const MetricSummarySchema = z.object({
-  serverId: z.string(),
-  cpuUsage: z.number(),
-  memoryUsage: z.number(),
-  diskUsage: z.number(),
-  networkIn: z.number(),
-  networkOut: z.number(),
-  loadAverage: z.number(),
-  uptime: z.number(),
-  lastUpdated: z.string(),
-})
+export interface Alert {
+  id: string
+  serverId: string
+  type: string
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
+  message: string
+  threshold: number
+  currentValue: number
+  status: "ACTIVE" | "RESOLVED"
+  createdAt: string
+  resolvedAt: string | null
+  server: {
+    id: string
+    name: string
+    hostname: string
+  }
+}
 
-// Alert Types
-export const AlertSchema = z.object({
-  id: z.string(),
-  serverId: z.string(),
-  type: z.string(),
-  severity: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
-  status: z.enum(["ACTIVE", "RESOLVED", "ACKNOWLEDGED"]),
-  title: z.string(),
-  message: z.string(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
-})
+export interface Document {
+  id: string
+  title: string
+  content: string
+  source: string
+  category: string
+  tags: string[]
+  createdAt: string
+  updatedAt: string
+}
 
-// AI Chat Types
-export const ChatMessageSchema = z.object({
-  id: z.string(),
-  message: z.string(),
-  response: z.string(),
-  sessionId: z.string(),
-  userId: z.string(),
-  timestamp: z.string(),
-})
+export interface ChatSession {
+  id: string
+  userId: string
+  title: string
+  messages: ChatMessage[]
+  context: any
+  createdAt: string
+  updatedAt: string
+}
 
-export const ChatSessionSchema = z.object({
-  id: z.string(),
-  userId: z.string(),
-  title: z.string(),
-  createdAt: z.string(),
-  messages: z.array(ChatMessageSchema),
-})
+export interface ChatMessage {
+  role: "user" | "assistant"
+  content: string
+  timestamp: string
+}
 
-// Notification Types
-export const NotificationChannelSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  type: z.enum(["email", "sms", "webhook", "slack"]),
-  config: z.record(z.string(), z.unknown()),
-  isActive: z.boolean(),
-  createdAt: z.string(),
-})
+export interface NotificationTemplate {
+  id: string
+  name: string
+  type: string
+  subject: string
+  body: string
+  variables: string[]
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
 
-export const NotificationSchema = z.object({
-  id: z.string(),
-  type: z.string(),
-  title: z.string(),
-  message: z.string(),
-  recipient: z.string(),
-  channelType: z.string(),
-  status: z.enum(["PENDING", "SENT", "FAILED"]),
-  priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
-  createdAt: z.string(),
-})
+export interface Subscription {
+  id: string
+  userId: string
+  serverId: string
+  alertType: string
+  channels: string[]
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
 
-// Export types
-export type User = z.infer<typeof UserSchema>
-export type LoginData = z.infer<typeof LoginSchema>
-export type RegisterData = z.infer<typeof RegisterSchema>
-export type Server = z.infer<typeof ServerSchema>
-export type Metric = z.infer<typeof MetricSchema>
-export type MetricSummary = z.infer<typeof MetricSummarySchema>
-export type Alert = z.infer<typeof AlertSchema>
-export type ChatMessage = z.infer<typeof ChatMessageSchema>
-export type ChatSession = z.infer<typeof ChatSessionSchema>
-export type NotificationChannel = z.infer<typeof NotificationChannelSchema>
-export type Notification = z.infer<typeof NotificationSchema>
+export interface Notification {
+  id: string
+  type: string
+  title: string
+  message: string
+  recipient: string
+  channelType: string
+  status: "pending" | "sent" | "failed" | "delivered"
+  priority: string
+  metadata: any
+  sentAt: string | null
+  deliveredAt: string | null
+  failedAt: string | null
+  error: string | null
+  retryCount: number
+  maxRetries: number
+  createdAt: string
+  updatedAt: string
+  templateId: string | null
+  channelId: string | null
+  template?: NotificationTemplate
+}
+
+export interface NotificationStats {
+  total: number
+  sent: number
+  failed: number
+  pending: number
+  deliveryRate: number
+}

@@ -22,7 +22,7 @@ const sendNotificationSchema = z.object({
 router.post("/send", async (req, res, next) => {
   try {
     const notificationData = sendNotificationSchema.parse(req.body)
-
+    console.log("message");
     const notification = await notificationService.sendNotification(notificationData)
 
     res.status(201).json({

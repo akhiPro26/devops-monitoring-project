@@ -12,22 +12,31 @@ export class PredictionService {
     algorithm?: string
   }) {
     try {
-      // Fetch historical metrics from monitoring service
-      const metricsResponse = await axios.get(`http://monitoring-service:3002/api/metrics/server/${data.serverId}`, {
-        params: {
-          metricType: data.metricType,
-          limit: 100,
-        },
-      })
+      console.log("hello = ", data.serverId);
 
-      const metrics = metricsResponse.data.data
+      const metricsResponse = await axios.get(
+        `http://localhost:3002/api/servers/${data.serverId}`,
+        {
+          params: {
+            metricType: data.metricType,
+            limit: 100,
+          },
+          validateStatus: () => true, // prevent axios from throwing on 404
+        }
+      );
 
-      if (metrics.length < 10) {
-        throw new Error("Insufficient historical data for prediction")
+      // Handle case where server is not found
+      if (metricsResponse.status === 404 || !metricsResponse.data || !metricsResponse.data.data) {
+        return { message: "Server not found" };
       }
 
-      // Simple linear regression prediction (in production, use ML models)
-      const prediction = this.performLinearRegression(metrics, data.timeframe)
+      const metrics = metricsResponse.data.data;
+
+      if (!metrics || metrics.length < 10) {
+        throw new Error("Insufficient historical data for prediction");
+      }
+
+      const prediction = this.performLinearRegression(metrics, data.timeframe);
 
       const savedPrediction = await prisma.prediction.create({
         data: {
@@ -43,13 +52,14 @@ export class PredictionService {
             seasonality: prediction.seasonality,
           },
         },
-      })
+      });
 
-      return savedPrediction
+      return savedPrediction;
     } catch (error) {
-      logger.error("Error generating prediction:", error)
-      throw error
+      logger.error("Error generating prediction:", error);
+      throw error;
     }
+
   }
 
   private performLinearRegression(metrics: any[], timeframe: string) {
@@ -98,7 +108,7 @@ export class PredictionService {
       // In production, compare with actual values
       const accuracy = {
         totalPredictions: predictions.length,
-        averageConfidence: predictions.reduce((sum:any, p:any) => sum + p.confidence, 0) / predictions.length,
+        averageConfidence: predictions.reduce((sum: any, p: any) => sum + p.confidence, 0) / predictions.length,
         accuracyScore: 0.75, // Placeholder
       }
 

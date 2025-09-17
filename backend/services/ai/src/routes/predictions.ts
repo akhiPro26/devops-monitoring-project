@@ -257,6 +257,7 @@ router.post("/generate", async (req, res, next) => {
       data: prediction,
     })
   } catch (error) {
+    // console.log("ERROR = ", error.message)
     next(error)
   }
 })

@@ -1,0 +1,1269 @@
+API calls on 3001/auth
+POST: http://localhost:3001/auth/register
+body of API: {
+    "email": "akhilesh@uptiq.edu",
+    "username": "akhilesh13",
+    "password": "123456",
+    "firstName": "Akhilesh",
+    "lastName": "Pimple"
+}
+
+API responce: {
+    "message": "User registered successfully",
+    "user": {
+        "id": "cmfglvfyr0002u62z9klm4ik6",
+        "email": "akhilesh@dj.edu",
+        "username": "akhilesh1326",
+        "firstName": "Akhilesh",
+        "lastName": "Pimple",
+        "role": "USER",
+        "createdAt": "2025-09-12T08:59:02.932Z"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWZnbHZmeXIwMDAydTYyejlrbG00aWs2IiwiZW1haWwiOiJha2hpbGVzaEBkai5lZHUiLCJpYXQiOjE3NTc2Njc1NDIsImV4cCI6MTc1Nzc1Mzk0Mn0.x-ezSU-3IlyMgIus-OQ9njfV4Y5eqCr6wOXXBkI19_Y"
+}
+
+POST: http://localhost:3001/auth/login
+body of API:{
+    "email": "akhilesh@uptiq.edu",
+    "password": "123456"
+}
+
+API responce: {
+    "message": "Login successful",
+    "user": {
+        "id": "cmffdt1gs0000u6cpctz26nnk",
+        "email": "akhilesh@uptiq.edu",
+        "username": "akhilesh13",
+        "firstName": "Akhilesh",
+        "lastName": "Pimple",
+        "role": "USER"
+    },
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjbWZmZHQxZ3MwMDAwdTZjcGN0ejI2bm5rIiwiZW1haWwiOiJha2hpbGVzaEB1cHRpcS5lZHUiLCJpYXQiOjE3NTc2Njc1MTYsImV4cCI6MTc1Nzc1MzkxNn0.DlY1PYxKOR09iF4GMTyD9gzbzBuJTdKySsOlSJC0Xto"
+}
+
+GET: http://localhost:3001/auth/me
+body of API: not applicable
+API responce:{
+    "user": {
+        "id": "cmffdt1gs0000u6cpctz26nnk",
+        "email": "akhilesh@uptiq.edu",
+        "username": "akhilesh13",
+        "firstName": "Akhilesh",
+        "lastName": "Pimple",
+        "role": "USER",
+        "createdAt": "2025-09-11T12:25:27.724Z",
+        "teamMemberships": []
+    }
+}
+###########################################################
+API calls on 3001/users 
+// all calls are made for only admin role
+
+
+
+API calls on 3001/servers
+
+POST: http://localhost:3001/servers/
+body of API: {
+  "name": "Backend API Server",
+  "hostname": "api-server-01",
+  "ipAddress": "192.168.10.25",
+  "environment": "DEVELOPMENT",
+  "description": "Handles all backend API requests",
+  "teamId": "cmfgmnlzd0004u62zz6ao0llm"
+}
+
+API responce:{
+    "message": "Server created successfully",
+    "server": {
+        "id": "cmfgnbb5y000au62zgro1ro5l",
+        "name": "Backend API Server",
+        "hostname": "api-server-01",
+        "ipAddress": "192.168.10.25",
+        "environment": "DEVELOPMENT",
+        "status": "ACTIVE",
+        "description": "Handles all backend API requests",
+        "createdAt": "2025-09-12T09:39:22.823Z",
+        "updatedAt": "2025-09-12T09:39:22.823Z",
+        "teamId": "cmfgmnlzd0004u62zz6ao0llm",
+        "team": {
+            "id": "cmfgmnlzd0004u62zz6ao0llm",
+            "name": "Backend Dev Team"
+        }
+    }
+}
+
+GET: http://localhost:3001/servers/
+// only servers where user has access to
+body of API:  not applicable
+API responce body:{
+    "servers": [
+        {
+            "id": "cmfgnbb5y000au62zgro1ro5l",
+            "name": "Backend API Server",
+            "hostname": "api-server-01",
+            "ipAddress": "192.168.10.25",
+            "environment": "DEVELOPMENT",
+            "status": "ACTIVE",
+            "description": "Handles all backend API requests",
+            "createdAt": "2025-09-12T09:39:22.823Z",
+            "updatedAt": "2025-09-12T09:39:22.823Z",
+            "teamId": "cmfgmnlzd0004u62zz6ao0llm",
+            "team": {
+                "id": "cmfgmnlzd0004u62zz6ao0llm",
+                "name": "Backend Dev Team"
+            },
+            "serverAccess": [
+                {
+                    "permissions": [
+                        "READ",
+                        "WRITE",
+                        "ADMIN"
+                    ]
+                }
+            ]
+        }
+    ]
+}
+
+
+
+
+
+API calls on 3001/teams 
+
+POST: http://localhost:3001/teams/
+body of API: {
+  "name": "Backend Dev Team",
+  "description": "This team handles all backend services and APIs."
+}
+API responce: {
+    "message": "Team created successfully",
+    "team": {
+        "id": "cmfgmnlzd0004u62zz6ao0llm",
+        "name": "Backend Dev Team",
+        "description": "This team handles all backend services and APIs.",
+        "createdAt": "2025-09-12T09:20:57.097Z",
+        "updatedAt": "2025-09-12T09:20:57.097Z",
+        "creatorId": "cmffdt1gs0000u6cpctz26nnk",
+        "creator": {
+            "id": "cmffdt1gs0000u6cpctz26nnk",
+            "username": "akhilesh13",
+            "email": "akhilesh@uptiq.edu"
+        },
+        "members": [
+            {
+                "id": "cmfgmnlzd0006u62zrq1vtwdl",
+                "role": "OWNER",
+                "joinedAt": "2025-09-12T09:20:57.097Z",
+                "userId": "cmffdt1gs0000u6cpctz26nnk",
+                "teamId": "cmfgmnlzd0004u62zz6ao0llm",
+                "user": {
+                    "id": "cmffdt1gs0000u6cpctz26nnk",
+                    "username": "akhilesh13",
+                    "email": "akhilesh@uptiq.edu"
+                }
+            }
+        ]
+    }
+}
+
+GET:http://localhost:3001/teams/my-team
+
+API Body:{
+  "name": "Backend Dev Team",
+  "description": "This team handles all backend services and APIs."
+}
+
+API responce:{
+    "teams": [
+        {
+            "id": "cmfgmnlzd0004u62zz6ao0llm",
+            "name": "Backend Dev Team",
+            "description": "This team handles all backend services and APIs.",
+            "createdAt": "2025-09-12T09:20:57.097Z",
+            "updatedAt": "2025-09-12T09:20:57.097Z",
+            "creatorId": "cmffdt1gs0000u6cpctz26nnk",
+            "creator": {
+                "id": "cmffdt1gs0000u6cpctz26nnk",
+                "username": "akhilesh13",
+                "email": "akhilesh@uptiq.edu"
+            },
+            "members": [
+                {
+                    "id": "cmfgmnlzd0006u62zrq1vtwdl",
+                    "role": "OWNER",
+                    "joinedAt": "2025-09-12T09:20:57.097Z",
+                    "userId": "cmffdt1gs0000u6cpctz26nnk",
+                    "teamId": "cmfgmnlzd0004u62zz6ao0llm",
+                    "user": {
+                        "id": "cmffdt1gs0000u6cpctz26nnk",
+                        "username": "akhilesh13",
+                        "email": "akhilesh@uptiq.edu"
+                    }
+                }
+            ],
+            "servers": []
+        }
+    ]
+}
+
+
+
+POST:http://localhost:3001/teams/:teamId/members
+
+API Body:{
+  "userId": "cmfglvfyr0002u62z9klm4ik6",
+  "role": "ADMIN"
+}
+
+API responce:{
+    "message": "Member added successfully",
+    "member": {
+        "id": "cmfgmyt7u0008u62z8ms3h7v1",
+        "role": "ADMIN",
+        "joinedAt": "2025-09-12T09:29:39.690Z",
+        "userId": "cmfglvfyr0002u62z9klm4ik6",
+        "teamId": "cmfgmnlzd0004u62zz6ao0llm",
+        "user": {
+            "id": "cmfglvfyr0002u62z9klm4ik6",
+            "username": "akhilesh1326",
+            "email": "akhilesh@dj.edu"
+        }
+    }
+}
+
+API calls based on 3002/api/metrics
+GET:http://localhost:3002/api/metrics
+this have different type of "type" as ["CPU_USAGE", "MEMORY_USAGE", "DISK_USAGE", "NETWORK_IN", "NETWORK_OUT", "LOAD_AVERAGE", "UPTIME"] create UI based on these
+API Body: not applicable
+API responce:[
+    {
+        "id": "cmfgnoyz8000xu6h9rh0f5p5a",
+        "serverId": "server_app01",
+        "type": "MEMORY_USAGE",
+        "value": 87.5809513168563,
+        "unit": "%",
+        "timestamp": "2025-09-12T09:50:00.213Z",
+        "server": {
+            "id": "server_app01",
+            "name": "Application Server 01",
+            "hostname": "app01.example.com"
+        }
+    },
+]
+
+GET:http://localhost:3002/api/metrics/summary/:serverId
+backend logic for above api call
+const metricTypes = ["CPU_USAGE", "MEMORY_USAGE", "DISK_USAGE", "LOAD_AVERAGE"]
+const summary: any = {}
+
+    for (const type of metricTypes) {
+      const latestMetric = await prisma.metric.findFirst({
+        where: { serverId, type: type as any },
+        orderBy: { timestamp: "desc" },
+      })
+
+      if (latestMetric) {
+        summary[type.toLowerCase()] = {
+          value: latestMetric.value,
+          unit: latestMetric.unit,
+          timestamp: latestMetric.timestamp,
+        }
+      }
+    }
+    
+API Body: not applicable
+API responce: {} // right now there is no responce 
+backend logic for above api call
+router.get("/history/:serverId/:type", async (req, res) => {
+  try {
+    const { serverId, type } = req.params
+    const { hours = "24" } = req.query
+
+    const hoursAgo = new Date()
+    hoursAgo.setHours(hoursAgo.getHours() - Number.parseInt(hours as string))
+
+    const metrics = await prisma.metric.findMany({
+      where: {
+        serverId,
+        type: type.toUpperCase() as any,
+        timestamp: { gte: hoursAgo },
+      },
+      orderBy: { timestamp: "asc" },
+    })
+
+    res.json(metrics)
+  } catch (error) {
+    logger.error("Error fetching metric history:", error)
+    res.status(500).json({ error: "Failed to fetch metric history" })
+  }
+})
+
+
+
+
+GET:http://localhost:3002/api/metrics/history/:serverId/:type
+
+API Body: not applicable
+API responce: [] // right now there is no responce 
+
+
+API calls on http://localhost:3002/api/servers
+GET:http://localhost:3002/api/server/
+
+API Body: not applicable
+API responce:[
+    {
+        "id": "server_web01",
+        "name": "Web Server 01",
+        "hostname": "web01.example.com",
+        "ipAddress": "192.168.1.10",
+        "port": 22,
+        "status": "ONLINE",
+        "lastSeen": "2025-09-12T10:13:00.093Z",
+        "createdAt": "2025-09-11T17:43:54.170Z",
+        "updatedAt": "2025-09-12T10:13:00.094Z",
+        "_count": {
+            "metrics": 208,
+            "alerts": 1
+        }
+    },
+    {
+        "id": "server_db01",
+        "name": "Database Server 01",
+        "hostname": "db01.example.com",
+        "ipAddress": "192.168.1.20",
+        "port": 22,
+        "status": "ONLINE",
+        "lastSeen": "2025-09-12T10:13:00.124Z",
+        "createdAt": "2025-09-11T17:43:54.170Z",
+        "updatedAt": "2025-09-12T10:13:00.125Z",
+        "_count": {
+            "metrics": 208,
+            "alerts": 1
+        }
+    },
+    {
+        "id": "server_app01",
+        "name": "Application Server 01",
+        "hostname": "app01.example.com",
+        "ipAddress": "192.168.1.30",
+        "port": 22,
+        "status": "ONLINE",
+        "lastSeen": "2025-09-12T10:13:00.157Z",
+        "createdAt": "2025-09-11T17:43:54.170Z",
+        "updatedAt": "2025-09-12T10:13:00.158Z",
+        "_count": {
+            "metrics": 208,
+            "alerts": 1
+        }
+    }
+]
+
+
+GET:http://localhost:3002/api/servers/:id
+same structure as from "metrics"
+GET:http://localhost:3002/api/metrics
+this have different type of "type" as ["CPU_USAGE", "MEMORY_USAGE", "DISK_USAGE", "NETWORK_IN", "NETWORK_OUT", "LOAD_AVERAGE", "UPTIME"] create UI based on these
+API Body: not applicable
+API responce:[
+    {
+        "id": "cmfgnoyz8000xu6h9rh0f5p5a",
+        "serverId": "server_app01",
+        "type": "MEMORY_USAGE",
+        "value": 87.5809513168563,
+        "unit": "%",
+        "timestamp": "2025-09-12T09:50:00.213Z",
+        "server": {
+            "id": "server_app01",
+            "name": "Application Server 01",
+            "hostname": "app01.example.com"
+        }
+    },
+]
+API Body:
+API responce:{
+    "id": "server_web01",
+    "name": "Web Server 01",
+    "hostname": "web01.example.com",
+    "ipAddress": "192.168.1.10",
+    "port": 22,
+    "status": "ONLINE",
+    "lastSeen": "2025-09-12T10:15:00.102Z",
+    "createdAt": "2025-09-11T17:43:54.170Z",
+    "updatedAt": "2025-09-12T10:15:00.103Z",
+    "metrics": [
+        {
+            "id": "cmfgol4a50093u6h9j30t8qhq",
+            "serverId": "server_web01",
+            "type": "DISK_USAGE",
+            "value": 0.3245661033916689,
+            "unit": "%",
+            "timestamp": "2025-09-12T10:15:00.078Z"
+        },
+        {
+            "id": "cmfgol4a50090u6h9oau0hm78",
+            "serverId": "server_web01",
+            "type": "CPU_USAGE",
+            "value": 8.425548710864264,
+            "unit": "%",
+            "timestamp": "2025-09-12T10:15:00.078Z"
+        }
+    ]
+}
+
+
+POST:http://localhost:3002/api/servers/
+
+API Body:{
+  "name": "Database Server 01",
+  "hostname": "hostname_02",
+  "ipAddress": "192.168.1.50"
+}
+
+API responce:{
+    "id": "cmfgp6px7001du6q6oq9tiyvd",
+    "name": "Database Server 01",
+    "hostname": "hostname_02",
+    "ipAddress": "192.168.1.50",
+    "port": 22,
+    "status": "UNKNOWN",
+    "lastSeen": null,
+    "createdAt": "2025-09-12T10:31:47.898Z",
+    "updatedAt": "2025-09-12T10:31:47.898Z"
+}
+
+
+PUT: http://localhost:3002/api/servers/cmfgp6px7001du6q6oq9tiyvd
+API body: {
+  "name": "Updated Backend Server",
+  "hostname": "hostname_02_updated",
+  "ipAddress": "192.168.1.77",
+  "port": 9090,
+  "status": "MAINTENANCE"
+}
+
+API responce:{
+    "id": "cmfgp6px7001du6q6oq9tiyvd",
+    "name": "Updated Backend Server",
+    "hostname": "hostname_02_updated",
+    "ipAddress": "192.168.1.77",
+    "port": 9090,
+    "status": "MAINTENANCE",
+    "lastSeen": "2025-09-12T10:36:00.141Z",
+    "createdAt": "2025-09-12T10:31:47.898Z",
+    "updatedAt": "2025-09-12T10:36:48.032Z"
+}
+
+
+DELETE: http://localhost:3002/api/servers/cmfgp6px7001du6q6oq9tiyvd
+API body: not applicable
+api responce: not applicable
+api status: 204
+
+
+API calls on http://localhost:3002/api/alerts
+
+GET: http://localhost:3002/api/alerts
+API body: not applicable
+API responce: [
+    {
+        "id": "cmffdvnvq000hu61ul4lyvpre",
+        "serverId": "server_web01",
+        "type": "HIGH_MEMORY",
+        "severity": "HIGH",
+        "message": "High Memory Usage: Web Server 01 memory usage is 89.27%, exceeding threshold of 85%",
+        "threshold": 85,
+        "currentValue": 89.26518263504938,
+        "status": "ACTIVE",
+        "createdAt": "2025-09-11T12:27:30.086Z",
+        "resolvedAt": null,
+        "server": {
+            "id": "server_web01",
+            "name": "Web Server 01",
+            "hostname": "web01.example.com"
+        }
+    },
+    {
+        "id": "cmffdvnvj000fu61uftcpsr6n",
+        "serverId": "server_db01",
+        "type": "HIGH_MEMORY",
+        "severity": "HIGH",
+        "message": "High Memory Usage: Database Server 01 memory usage is 89.27%, exceeding threshold of 85%",
+        "threshold": 85,
+        "currentValue": 89.26997106739394,
+        "status": "ACTIVE",
+        "createdAt": "2025-09-11T12:27:30.080Z",
+        "resolvedAt": null,
+        "server": {
+            "id": "server_db01",
+            "name": "Database Server 01",
+            "hostname": "db01.example.com"
+        }
+    },
+    {
+        "id": "cmffdvnuq000du61udhmg49i7",
+        "serverId": "server_app01",
+        "type": "HIGH_MEMORY",
+        "severity": "HIGH",
+        "message": "High Memory Usage: Application Server 01 memory usage is 89.20%, exceeding threshold of 85%",
+        "threshold": 85,
+        "currentValue": 89.19702229339474,
+        "status": "ACTIVE",
+        "createdAt": "2025-09-11T12:27:30.050Z",
+        "resolvedAt": null,
+        "server": {
+            "id": "server_app01",
+            "name": "Application Server 01",
+            "hostname": "app01.example.com"
+        }
+    }
+]
+
+
+
+GET: http://localhost:3002/api/alerts/active
+API body: not applicable
+API responce: {
+    "total": 3,
+    "critical": 0,
+    "high": 3,
+    "medium": 0,
+    "low": 0
+}
+
+
+
+PUT: http://localhost:3002/api/alerts/:id
+API body: {
+  "status": "RESOLVED"
+}
+API responce:{
+    "id": "cmffdvnvq000hu61ul4lyvpre",
+    "serverId": "server_web01",
+    "type": "HIGH_MEMORY",
+    "severity": "HIGH",
+    "message": "High Memory Usage: Web Server 01 memory usage is 89.27%, exceeding threshold of 85%",
+    "threshold": 85,
+    "currentValue": 89.26518263504938,
+    "status": "RESOLVED",
+    "createdAt": "2025-09-11T12:27:30.086Z",
+    "resolvedAt": "2025-09-14T04:04:19.057Z",
+    "server": {
+        "id": "server_web01",
+        "name": "Web Server 01",
+        "hostname": "web01.example.com"
+    }
+}
+
+
+DELETE: http://localhost:3002/api/alerts/:id
+API body: not applicable
+API responce: no content
+
+
+
+API calls on http://localhost:3002/api/health
+
+GET: http://localhost:3002/api/health/checks/:serverId
+API body: not applicable
+API responce: [] right now nothing came so below in backend code 
+router.get("/checks/:serverId", async (req, res) => {
+  try {
+    const { serverId } = req.params
+    const { limit = "50" } = req.query
+
+    const healthChecks = await prisma.healthCheck.findMany({
+      where: { serverId },
+      orderBy: { timestamp: "desc" },
+      take: Number.parseInt(limit as string),
+    })
+
+    res.json(healthChecks)
+  } catch (error) {
+    logger.error("Error fetching health checks:", error)
+    res.status(500).json({ error: "Failed to fetch health checks" })
+  }
+})
+
+
+GET: http://localhost:3002/api/health/status/:serverId
+API body: not applicable
+API responce: [] right now nothing came so below in backend code
+router.get("/status/:serverId", async (req, res) => {
+  try {
+    const { serverId } = req.params
+
+    const latestCheck = await prisma.healthCheck.findFirst({
+      where: { serverId },
+      orderBy: { timestamp: "desc" },
+    })
+
+    if (!latestCheck) {
+      return res.status(404).json({ error: "No health checks found for this server" })
+    }
+
+    res.json(latestCheck)
+  } catch (error) {
+    logger.error("Error fetching health status:", error)
+    res.status(500).json({ error: "Failed to fetch health status" })
+  }
+})
+
+GET: http://localhost:3002/api/health/overview
+API body: not applicable
+API responce: [
+    {
+        "id": "cmfkot6se002mu6ta7vs5ll2f",
+        "name": "Database Server 02",
+        "hostname": "hostname_03",
+        "status": "ONLINE",
+        "lastHealthCheck": null
+    },
+    {
+        "id": "server_app01",
+        "name": "Application Server 01",
+        "hostname": "app01.example.com",
+        "status": "ONLINE",
+        "lastHealthCheck": null
+    },
+    {
+        "id": "cmfkomi1n000cu6taeugdeoql",
+        "name": "Database Server 01",
+        "hostname": "hostname_02",
+        "status": "ONLINE",
+        "lastHealthCheck": null
+    },
+    {
+        "id": "server_web01",
+        "name": "Web Server 01",
+        "hostname": "web01.example.com",
+        "status": "ONLINE",
+        "lastHealthCheck": null
+    },
+    {
+        "id": "server_db01",
+        "name": "Database Server 01",
+        "hostname": "db01.example.com",
+        "status": "ONLINE",
+        "lastHealthCheck": null
+    }
+]
+
+
+API calls on AI service 
+localhost:3003/
+
+POST: http://localhost:3003/rag/query
+API body: {
+  "query": "What is the uptime of my servers?"
+}
+
+API responce:{
+    "success": true,
+    "data": {
+        "answer": "The provided context contains no information about server uptime.  More information is needed.\n",
+        "sources": []
+    }
+}
+
+POST: http://localhost:3003/rag/Documents
+API body:{
+  "title": "Server Monitoring Guide",
+  "content": "This document explains how to monitor servers using Prometheus and Grafana.",
+  "source": "internal_wiki",
+  "category": "infrastructure"
+}
+API responce:{
+    "success": true,
+    "data": {
+        "id": "cmfkux17i0000jbuuacdht032",
+        "title": "Server Monitoring Guide",
+        "content": "This document explains how to monitor servers using Prometheus and Grafana.",
+        "source": "internal_wiki",
+        "category": "infrastructure",
+        "tags": [],
+        "embedding": [1.517,1.551,1.401,1.207,1.042,0.882,0.764,0.483,0.227,0.218,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "metadata": null,
+        "createdAt": "2025-09-15T08:23:18.364Z",
+        "updatedAt": "2025-09-15T08:23:18.364Z"
+    }
+}
+
+POST: http://localhost:3003/rag/documents
+API body:{
+  "title": "Server Monitoring Guide",
+  "content": "This document explains how to monitor servers using Prometheus and Grafana.",
+  "source": "internal_wiki",
+  "category": "infrastructure"
+}
+API responce:{
+    "success": true,
+    "data": {
+        "id": "cmfkux17i0000jbuuacdht032",
+        "title": "Server Monitoring Guide",
+        "content": "This document explains how to monitor servers using Prometheus and Grafana.",
+        "source": "internal_wiki",
+        "category": "infrastructure",
+        "tags": [],
+        "embedding": [1.517,1.551,1.401,1.207,1.042,0.882,0.764,0.483,0.227,0.218,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "metadata": null,
+        "createdAt": "2025-09-15T08:23:18.364Z",
+        "updatedAt": "2025-09-15T08:23:18.364Z"
+    }
+}
+
+GET: http://localhost:3003/rag/documents
+API body:not applicable
+API responce:{
+    "success": true,
+    "data": {
+        "id": "cmfkux17i0000jbuuacdht032",
+        "title": "Server Monitoring Guide",
+        "content": "This document explains how to monitor servers using Prometheus and Grafana.",
+        "source": "internal_wiki",
+        "category": "infrastructure",
+        "tags": [],
+        "embedding": [1.517,1.551,1.401,1.207,1.042,0.882,0.764,0.483,0.227,0.218,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "metadata": null,
+        "createdAt": "2025-09-15T08:23:18.364Z",
+        "updatedAt": "2025-09-15T08:23:18.364Z"
+    }
+}
+
+DELETE http://localhost:3003/rag/documents/:id
+API body:not applicable
+API responce: not applicable only status code
+
+
+POST http://localhost:3003/predictions/generate
+API body: {
+  "serverId": "server-123",
+  "metricType": "cpu_usage",
+  "timeframe": "24h"
+}
+API responce:{
+    "success": true,
+    "data": {
+        "message": "Server not found"
+    }
+}
+right now not found but structure is same
+
+
+GET http://localhost:3003/predictions/server/:serverId
+API body: not applicable
+API responce: {
+    "success": true,
+    "data": []
+}
+
+
+GET http://localhost:3003/predictions/accuracy/:serverId
+API body: not applicable
+API responce: {
+    "success": true,
+    "data": {
+        "totalPredictions": 0,
+        "averageConfidence": null,
+        "accuracyScore": 0.75
+    }
+}
+
+
+POST http://localhost:3003/chat/message
+API body: {
+  "message": "Hello, how are you?",
+  "sessionId": "session_12345",
+  "userId": "user_67890",
+  "context": {
+    "serverId": "server_001",
+    "category": "greeting"
+  }
+}
+API responce:{
+    "success": true,
+    "data": {
+        "sessionId": "cmfky5qrq0000629mz5phm41p",
+        "response": "I'm doing well, thanks!  How can I help you monitor your servers today?  Let's discuss your specific needs.\n",
+        "sources": [
+            {
+                "id": "cmfkux17i0000jbuuacdht032",
+                "title": "Server Monitoring Guide",
+                "source": "internal_wiki"
+            }
+        ]
+    }
+}
+
+
+POST http://localhost:3003/chat/sessions/:userId
+API body: not applicable
+API responce: {
+    "success": true,
+    "data": [
+        {
+            "id": "cmfky5qrq0000629mz5phm41p",
+            "userId": "user_67890",
+            "title": "Hello, how are you?...",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": "Hello, how are you?",
+                    "timestamp": "2025-09-15T09:54:07.671Z"
+                },
+                {
+                    "role": "assistant",
+                    "content": "I'm doing well, thanks!  How can I help you monitor your servers today?  Let's discuss your specific needs.\n",
+                    "timestamp": "2025-09-15T09:54:07.671Z"
+                }
+            ],
+            "context": {
+                "category": "greeting",
+                "serverId": "server_001"
+            },
+            "createdAt": "2025-09-15T09:54:03.590Z",
+            "updatedAt": "2025-09-15T09:54:07.671Z"
+        },
+        {
+            "id": "cmfky18h20000p3vetjya5x5l",
+            "userId": "user_67890",
+            "title": "Hello, how are you?...",
+            "messages": [],
+            "context": {
+                "category": "greeting",
+                "serverId": "server_001"
+            },
+            "createdAt": "2025-09-15T09:50:33.254Z",
+            "updatedAt": "2025-09-15T09:50:33.254Z"
+        }
+    ]
+}
+
+
+
+
+
+API calls on notification service 
+localhost:3004/
+
+POST http://localhost:3004/templates/
+API body:{
+  "name": "CPU Alert Template",
+  "type": "alert",
+  "subject": "High CPU Usage Alert",
+  "body": "Server {{serverId}} is experiencing CPU usage of {{currentValue}} which is above the threshold {{threshold}}.",
+  "variables": ["serverId", "currentValue", "threshold"],
+  "isActive": true
+}
+API responce:{
+    "success": true,
+    "data": {
+        "id": "cmfl1f59q0002u6377q8wqs34",
+        "name": "CPU Alert Template",
+        "type": "alert",
+        "subject": "High CPU Usage Alert",
+        "body": "Server {{serverId}} is experiencing CPU usage of {{currentValue}} which is above the threshold {{threshold}}.",
+        "variables": [
+            "serverId",
+            "currentValue",
+            "threshold"
+        ],
+        "isActive": true,
+        "createdAt": "2025-09-15T11:25:21.134Z",
+        "updatedAt": "2025-09-15T11:25:21.134Z"
+    }
+}
+
+GET http://localhost:3004/templates/
+API body: not applicable
+API responce: {
+    "success": true,
+    "data": [
+        {
+            "id": "cmfl1f59q0002u6377q8wqs34",
+            "name": "CPU Alert Template",
+            "type": "alert",
+            "subject": "High CPU Usage Alert",
+            "body": "Server {{serverId}} is experiencing CPU usage of {{currentValue}} which is above the threshold {{threshold}}.",
+            "variables": [
+                "serverId",
+                "currentValue",
+                "threshold"
+            ],
+            "isActive": true,
+            "createdAt": "2025-09-15T11:25:21.134Z",
+            "updatedAt": "2025-09-15T11:25:21.134Z"
+        }
+    ]
+}
+
+GET http://localhost:3004/templates/:id
+API body: not applicable
+API responce: {
+    "success": true,
+    "data": {
+        "id": "cmfl1f59q0002u6377q8wqs34",
+        "name": "CPU Alert Template",
+        "type": "alert",
+        "subject": "High CPU Usage Alert",
+        "body": "Server {{serverId}} is experiencing CPU usage of {{currentValue}} which is above the threshold {{threshold}}.",
+        "variables": [
+            "serverId",
+            "currentValue",
+            "threshold"
+        ],
+        "isActive": true,
+        "createdAt": "2025-09-15T11:25:21.134Z",
+        "updatedAt": "2025-09-15T11:25:21.134Z"
+    }
+}
+
+DELETE http://localhost:3004/templates/:id
+API body: not applicable
+API responce: status of success deletion 
+
+
+POST http://localhost:3004/subscriptions/
+API body: {
+  "userId": "cmfl0e6860007u6r1pvsqqzek",
+  "serverId": "cmfgnbb5y000au62zgro1ro5l",
+  "alertType": "email",
+  "channels": ["general", "alerts", "updates"],
+  "isActive": true
+}
+API responce:{
+    "success": true,
+    "data": {
+        "id": "cmfmg680o0000u6rzxqe3gcto",
+        "userId": "cmfl0e6860007u6r1pvsqqzek",
+        "serverId": "cmfgnbb5y000au62zgro1ro5l",
+        "alertType": "email",
+        "channels": [
+            "general",
+            "alerts",
+            "updates"
+        ],
+        "isActive": true,
+        "createdAt": "2025-09-16T11:06:05.208Z",
+        "updatedAt": "2025-09-16T11:06:05.208Z"
+    }
+}
+
+GET http://localhost:3004/subscriptions/user/:userId
+API body: not applicable
+API responce:{
+    "success": true,
+    "data": [
+        {
+            "id": "cmfmg680o0000u6rzxqe3gcto",
+            "userId": "cmfl0e6860007u6r1pvsqqzek",
+            "serverId": "cmfgnbb5y000au62zgro1ro5l",
+            "alertType": "email",
+            "channels": [
+                "general",
+                "alerts",
+                "updates"
+            ],
+            "isActive": true,
+            "createdAt": "2025-09-16T11:06:05.208Z",
+            "updatedAt": "2025-09-16T11:06:05.208Z"
+        }
+    ]
+}
+
+PUT http://localhost:3004/subscriptions/:id
+API body: {
+  "channels": ["news", "updates"]
+}
+
+API responce:{
+    "success": true,
+    "data": {
+        "id": "cmfmg680o0000u6rzxqe3gcto",
+        "userId": "cmfl0e6860007u6r1pvsqqzek",
+        "serverId": "cmfgnbb5y000au62zgro1ro5l",
+        "alertType": "email",
+        "channels": [
+            "news",
+            "updates"
+        ],
+        "isActive": true,
+        "createdAt": "2025-09-16T11:06:05.208Z",
+        "updatedAt": "2025-09-16T11:12:12.046Z"
+    }
+}
+
+DELETE http://localhost:3004/subscriptions/:id
+API body: not applicable
+API responce{
+    "success": true,
+    "message": "Subscription deleted successfully"
+}
+
+
+
+POST http://localhost:3004/channels/
+API body:{
+  "name": "Primary Email Alerts",
+  "type": "email",
+  "config": {
+    "address": "alerts@example.com"
+  },
+  "isActive": true
+}
+
+API responce:{
+    "success": true,
+    "data": {
+        "id": "cmfmgqk1w0001u6rzrh8zd6jz",
+        "name": "Primary Email Alerts",
+        "type": "email",
+        "config": {
+            "address": "akhilesh.pimple23@vit.edu"
+        },
+        "isActive": true,
+        "createdAt": "2025-09-16T11:21:53.924Z",
+        "updatedAt": "2025-09-16T11:21:53.924Z"
+    }
+}
+
+
+GET http://localhost:3004/channels/
+API body: not applicable
+API responce: {
+    "success": true,
+    "data": [
+        {
+            "id": "cmfmgqk1w0001u6rzrh8zd6jz",
+            "name": "Primary Email Alerts",
+            "type": "email",
+            "config": {
+                "address": "akhilesh.pimple23@vit.edu"
+            },
+            "isActive": true,
+            "createdAt": "2025-09-16T11:21:53.924Z",
+            "updatedAt": "2025-09-16T11:21:53.924Z"
+        }
+    ]
+}
+
+GET http://localhost:3004/channels/:id
+API body: not applicable
+API responce: {
+    "success": true,
+    "data": {
+        "id": "cmfmgqk1w0001u6rzrh8zd6jz",
+        "name": "Primary Email Alerts",
+        "type": "email",
+        "config": {
+            "address": "akhilesh.pimple23@vit.edu"
+        },
+        "isActive": true,
+        "createdAt": "2025-09-16T11:21:53.924Z",
+        "updatedAt": "2025-09-16T11:21:53.924Z"
+    }
+}
+
+PUT http://localhost:3004/channels/:id
+API body:{
+    "name": "Secondary alert by email"
+}
+API responce:{
+    "success": true,
+    "data": {
+        "id": "cmfmgqk1w0001u6rzrh8zd6jz",
+        "name": "Secondary alert by email",
+        "type": "email",
+        "config": {
+            "address": "akhilesh.pimple23@vit.edu"
+        },
+        "isActive": true,
+        "createdAt": "2025-09-16T11:21:53.924Z",
+        "updatedAt": "2025-09-16T11:28:14.632Z"
+    }
+}
+
+
+DELETE http://localhost:3004/channels/:id
+API body: not applicable
+API responce: {
+      success: true,
+      message: "Channel deleted successfully",
+    }
+
+POST http://localhost:3004/channels/:id/test
+API body:{
+  "recipient": "akhilesh.pimple23@vit.edu",
+  "message": "This is a test notification"
+}
+API responce:{
+    "success": true,
+    "message": "Test notification sent successfully"
+}
+
+
+POST http://localhost:3004/notifications/send
+API body:{
+  "type": "alert",
+  "title": "High CPU Usage",
+  "message": "Server 123 is experiencing CPU usage above 90%.",
+  "recipient": "akhilesh.pimple23@vit.edu",
+  "channelType": "email",
+  "priority": "high",
+  "templateId": "cmfl1f59q0002u6377q8wqs34",
+  "metadata": {
+    "serverId": "server_123",
+    "threshold": "90%",
+    "currentValue": "95%"
+  }
+}
+API responce:{
+    "success": true,
+    "data": {
+        "id": "cmfmh7ptk0003u6rzvfblf7b3",
+        "type": "alert",
+        "title": "High CPU Usage",
+        "message": "Server 123 is experiencing CPU usage above 90%.",
+        "recipient": "akhilesh.pimple23@vit.edu",
+        "channelType": "email",
+        "status": "pending",
+        "priority": "high",
+        "metadata": {
+            "serverId": "server_123",
+            "threshold": "90%",
+            "currentValue": "95%"
+        },
+        "sentAt": null,
+        "deliveredAt": null,
+        "failedAt": null,
+        "error": null,
+        "retryCount": 0,
+        "maxRetries": 3,
+        "createdAt": "2025-09-16T11:35:14.552Z",
+        "updatedAt": "2025-09-16T11:35:14.552Z",
+        "templateId": "cmfl1f59q0002u6377q8wqs34",
+        "channelId": null
+    }
+}
+
+
+GET http://localhost:3004/notifications/
+API body: not applicable
+API responce: {
+    "success": true,
+    "data": [
+        {
+            "id": "cmfmh7ptk0003u6rzvfblf7b3",
+            "type": "alert",
+            "title": "High CPU Usage",
+            "message": "Server 123 is experiencing CPU usage above 90%.",
+            "recipient": "akhilesh.pimple23@vit.edu",
+            "channelType": "email",
+            "status": "failed",
+            "priority": "high",
+            "metadata": {
+                "serverId": "server_123",
+                "threshold": "90%",
+                "currentValue": "95%"
+            },
+            "sentAt": null,
+            "deliveredAt": null,
+            "failedAt": null,
+            "error": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-776210c4a5bsm10100697b3a.47 - gsmtp",
+            "retryCount": 0,
+            "maxRetries": 3,
+            "createdAt": "2025-09-16T11:35:14.552Z",
+            "updatedAt": "2025-09-16T11:35:16.347Z",
+            "templateId": "cmfl1f59q0002u6377q8wqs34",
+            "channelId": null,
+            "template": {
+                "id": "cmfl1f59q0002u6377q8wqs34",
+                "name": "CPU Alert Template",
+                "type": "alert",
+                "subject": "High CPU Usage Alert",
+                "body": "Server {{serverId}} is experiencing CPU usage of {{currentValue}} which is above the threshold {{threshold}}.",
+                "variables": [
+                    "serverId",
+                    "currentValue",
+                    "threshold"
+                ],
+                "isActive": true,
+                "createdAt": "2025-09-15T11:25:21.134Z",
+                "updatedAt": "2025-09-15T11:25:21.134Z"
+            },
+            "channel": null
+        },
+    ]
+}
+
+GET http://localhost:3004/notifications/stats/overview
+API body: not applicable
+API responce:{
+    "success": true,
+    "data": {
+        "total": 2,
+        "sent": 0,
+        "failed": 2,
+        "pending": 0,
+        "deliveryRate": 0
+    }
+}
+
+GET http://localhost:3004/notifications/:id
+API body: not applicable
+API responce:{
+    "success": true,
+    "data": {
+        "id": "cmfmh7ptk0003u6rzvfblf7b3",
+        "type": "alert",
+        "title": "High CPU Usage",
+        "message": "Server 123 is experiencing CPU usage above 90%.",
+        "recipient": "akhilesh.pimple23@vit.edu",
+        "channelType": "email",
+        "status": "failed",
+        "priority": "high",
+        "metadata": {
+            "serverId": "server_123",
+            "threshold": "90%",
+            "currentValue": "95%"
+        },
+        "sentAt": null,
+        "deliveredAt": null,
+        "failedAt": null,
+        "error": "Invalid login: 535-5.7.8 Username and Password not accepted. For more information, go to\n535 5.7.8  https://support.google.com/mail/?p=BadCredentials d2e1a72fcca58-776210c4a5bsm10100697b3a.47 - gsmtp",
+        "retryCount": 0,
+        "maxRetries": 3,
+        "createdAt": "2025-09-16T11:35:14.552Z",
+        "updatedAt": "2025-09-16T11:35:16.347Z",
+        "templateId": "cmfl1f59q0002u6377q8wqs34",
+        "channelId": null,
+        "template": {
+            "id": "cmfl1f59q0002u6377q8wqs34",
+            "name": "CPU Alert Template",
+            "type": "alert",
+            "subject": "High CPU Usage Alert",
+            "body": "Server {{serverId}} is experiencing CPU usage of {{currentValue}} which is above the threshold {{threshold}}.",
+            "variables": [
+                "serverId",
+                "currentValue",
+                "threshold"
+            ],
+            "isActive": true,
+            "createdAt": "2025-09-15T11:25:21.134Z",
+            "updatedAt": "2025-09-15T11:25:21.134Z"
+        },
+        "channel": null
+    }
+}
+
+POST http://localhost:3004/notifications/:id/retry
+API body: not applicable
+API responce: {
+    "success": true,
+    "data": {
+        "success": true,
+        "message": "Notification queued for retry"
+    }
+}

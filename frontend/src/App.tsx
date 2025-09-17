@@ -1,53 +1,58 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
-import { AuthProvider } from "./context/AuthContext"
-import { ProtectedRoute } from "./components/protectedRoutes"
-import { LoginPage } from "./pages/LoginPage"
-import { RegisterPage } from "./pages/RegisterPage"
-import { DashboardLayout } from "./components/layout/DashboardLayout"
-import { DashboardPage } from "./pages/DashboardPage"
-import { ServerProvider } from "./context/ServerContext"
-import { ServersPage } from "./pages/ServerPage"
-import { MonitoringProvider } from "./context/MonitoringContext"
-import { MonitoringPage } from "./pages/MonitoringPage"
-import { ChatProvider } from "./context/ChatContext"
-import { AIChatPage } from "./pages/AIChatsPage"
-import { AlertProvider } from "./context/AlertContext"
-import { AlertsPage } from "./pages/AlertPage"
+"use client"
 
-function App() {
+import type React from "react"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
+import { AuthProvider, useAuth } from "./contexts/AuthContext"
+import Layout from "./components/Layout"
+import ProtectedRoute from "./components/ProtectedRoute"
+import Login from "./pages/Login"
+import Register from "./pages/Register"
+import Dashboard from "./pages/Dashboard"
+import Servers from "./pages/Servers"
+import Chat from "./pages/Chat"
+import Teams from "./pages/Teams"
+import Alerts from "./pages/Alerts"
+import Documents from "./pages/Documents"
+import Notifications from "./pages/Notifications"
+
+
+const AppRoutes: React.FC = () => {
+  const { user } = useAuth()
+
+  return (
+    <Routes>
+      <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
+      <Route path="/register" element={user ? <Navigate to="/" /> : <Register />} />
+      <Route
+        path="/*"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/servers" element={<Servers />} />
+                <Route path="/chat" element={<Chat />} />
+                <Route path="/teams" element={<Teams/>} />
+                <Route path="/alerts" element={<Alerts/>} />
+                <Route path="/documents" element={<Documents/>} />
+                <Route path="/notifications" element={<Notifications/>} />
+              </Routes>
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
+  )
+}
+
+const App: React.FC = () => {
   return (
     <AuthProvider>
-      <ServerProvider>
-        <MonitoringProvider>
-          <ChatProvider>
-            <AlertProvider>
-              <Router>
-                <Routes>
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
-                  <Route
-                    path="/*"
-                    element={
-                      <ProtectedRoute>
-                        <DashboardLayout>
-                          <Routes>
-                            <Route path="/dashboard" element={<DashboardPage />} />
-                            <Route path="/servers" element={<ServersPage />} />
-                            <Route path="/monitoring" element={<MonitoringPage />} />
-                            <Route path="/ai-chat" element={<AIChatPage />} />
-                            <Route path="/alerts" element={<AlertsPage />} />
-                            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                          </Routes>
-                        </DashboardLayout>
-                      </ProtectedRoute>
-                    }
-                  />
-                </Routes>
-              </Router>
-            </AlertProvider>
-          </ChatProvider>
-        </MonitoringProvider>
-      </ServerProvider>
+      <Router>
+        <div className="App">
+          <AppRoutes />
+        </div>
+      </Router>
     </AuthProvider>
   )
 }

@@ -44,7 +44,7 @@ export class ChatService {
       const messages = session.messages as any[]
       const conversationHistory = messages.slice(-10) // Last 10 messages
 
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" })
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
       const conversationContext = conversationHistory.map((msg) => `${msg.role}: ${msg.content}`).join("\n")
 
