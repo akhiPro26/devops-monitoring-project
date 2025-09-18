@@ -29,6 +29,7 @@ const Servers: React.FC = () => {
     try {
       const [serversRes, teamsRes] = await Promise.all([serversAPI.getAll(), teamsAPI.getMyTeams()])
       setServers(serversRes.data.servers || serversRes.data)
+      console.log(serversRes.data)
       setTeams(teamsRes.data.teams || teamsRes.data)
     } catch (error) {
       console.error("Error fetching data:", error)

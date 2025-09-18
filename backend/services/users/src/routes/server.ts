@@ -2,7 +2,7 @@ import express from "express"
 import { z } from "zod"
 import { PrismaClient } from "@prisma/client"
 import { authenticateToken, type AuthRequest } from "../middlewares/auth"
-
+import { EventBus, EventTypes } from "../../../../shared/utils/eventBus"
 const router = express.Router()
 const prisma = new PrismaClient()
 
@@ -23,6 +23,8 @@ const createServerSchema = z.object({
     description: z.string().optional(),
     teamId: z.string(),
 })
+
+const eventBus = EventBus.getInstance("user-service")
 
 router.post("/", authenticateToken, async (req: AuthRequest, res, next) => {
     try {
@@ -59,6 +61,9 @@ router.post("/", authenticateToken, async (req: AuthRequest, res, next) => {
                 permissions: ["READ", "WRITE", "ADMIN"],
             },
         })
+        
+        // PUBLISH THE EVENT
+        eventBus.publish(EventTypes.SERVER_ADDED, { serverId: server.id })
 
         res.status(201).json({ message: "Server created successfully", server })
     } catch (error) {

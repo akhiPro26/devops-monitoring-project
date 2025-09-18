@@ -27,18 +27,18 @@ export const createRateLimiter = (windowMs: number, max: number, message?: strin
 // Pre-configured rate limiters
 export const authLimiter = createRateLimiter(
   100, // 15 minutes
-  150, // 5 attempts
+  200, // 5 attempts
   "Too many authentication attempts"
 )
 
 export const apiLimiter = createRateLimiter(
   15 * 60 * 1000, // 15 minutes
-  100, // 100 requests
+  1000, // 100 requests
   "API rate limit exceeded"
 )
 
 export const strictLimiter = createRateLimiter(
   15 * 60 * 1000, // 15 minutes
-  10, // 10 requests
+  1000, // 10 requests
   "Rate limit exceeded for this endpoint"
 )

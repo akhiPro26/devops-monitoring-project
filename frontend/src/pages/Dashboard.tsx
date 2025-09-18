@@ -22,6 +22,8 @@ const Dashboard: React.FC = () => {
           monitoringAPI.getActiveAlerts(),
         ])
 
+        console.log(metricsRes)
+
         setMetrics(metricsRes.data)
         setAlerts(alertsRes.data)
         setActiveAlerts(activeAlertsRes.data)

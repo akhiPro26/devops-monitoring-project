@@ -12,10 +12,12 @@ import { MetricsCollector } from "./service/metricsCollector"
 import { AlertManager } from "./service/alertManager"
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger";
+import { EventBus, EventTypes } from "../../../shared/utils/eventBus"
 
 const app = express()
 const port = process.env.PORT || 3002
 const prisma = new PrismaClient()
+const eventBus = EventBus.getInstance("monitoring-service")
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -60,9 +62,16 @@ async function startServer() {
     alertManager.start()
     logger.info("Alert manager started")
 
+    eventBus.subscribe(EventTypes.SERVER_ADDED, async (event) => {
+        const { serverId } = event.payload
+        logger.info(`Received SERVER_ADDED event for server: ${serverId}. Starting immediate metrics collection.`)
+        await metricsCollector.collectServerMetrics(serverId) 
+      })
+
     app.listen(port, () => {
       logger.info(`Monitoring service running on port ${port}`)
     })
+
   } catch (error) {
     logger.error("Failed to start server:", error)
     process.exit(1)
