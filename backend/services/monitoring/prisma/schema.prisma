@@ -1,3 +1,4 @@
+// This schema will only contain the models that are unique to the monitoring service
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,25 +8,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Server {
-  id          String   @id @default(cuid())
-  name        String
-  hostname    String   @unique
-  ipAddress   String
-  port        Int      @default(22)
-  status      ServerStatus @default(UNKNOWN)
-  lastSeen    DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relations
-  metrics     Metric[]
-  alerts      Alert[]
-  healthChecks HealthCheck[]
-  
-  @@map("servers")
-}
-
+// These models will now point to the central server table in the users service
 model Metric {
   id        String     @id @default(cuid())
   serverId  String
@@ -33,9 +16,6 @@ model Metric {
   value     Float
   unit      String
   timestamp DateTime   @default(now())
-  
-  // Relations
-  server    Server     @relation(fields: [serverId], references: [id], onDelete: Cascade)
   
   @@map("metrics")
   @@index([serverId, type, timestamp])
@@ -53,9 +33,6 @@ model Alert {
   createdAt   DateTime    @default(now())
   resolvedAt  DateTime?
   
-  // Relations
-  server      Server      @relation(fields: [serverId], references: [id], onDelete: Cascade)
-  
   @@map("alerts")
 }
 
@@ -67,9 +44,6 @@ model HealthCheck {
   latency   Int?             // in milliseconds
   error     String?
   timestamp DateTime         @default(now())
-  
-  // Relations
-  server    Server           @relation(fields: [serverId], references: [id], onDelete: Cascade)
   
   @@map("health_checks")
   @@index([serverId, timestamp])
@@ -89,13 +63,7 @@ model AlertRule {
   @@map("alert_rules")
 }
 
-enum ServerStatus {
-  ONLINE
-  OFFLINE
-  UNKNOWN
-  MAINTENANCE
-}
-
+// These enums are needed for the monitoring service models
 enum MetricType {
   CPU_USAGE
   MEMORY_USAGE

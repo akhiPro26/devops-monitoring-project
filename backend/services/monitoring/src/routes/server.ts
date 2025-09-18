@@ -70,28 +70,28 @@ const updateServerSchema = z.object({
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get("/", async (req, res) => {
-  try {
-    const servers = await prisma.server.findMany({
-      include: {
-        _count: {
-          select: {
-            metrics: true,
-            alerts: {
-              where: { status: "ACTIVE" },
-            },
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    })
+// router.get("/", async (req, res) => {
+//   try {
+//     const servers = await prisma.server.findMany({
+//       include: {
+//         _count: {
+//           select: {
+//             metrics: true,
+//             alerts: {
+//               where: { status: "ACTIVE" },
+//             },
+//           },
+//         },
+//       },
+//       orderBy: { createdAt: "desc" },
+//     })
 
-    res.json(servers)
-  } catch (error) {
-    logger.error("Error fetching servers:", error)
-    res.status(500).json({ error: "Failed to fetch servers" })
-  }
-})
+//     res.json(servers)
+//   } catch (error) {
+//     logger.error("Error fetching servers:", error)
+//     res.status(500).json({ error: "Failed to fetch servers" })
+//   }
+// })
 
 /**
  * @swagger
@@ -151,32 +151,34 @@ router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params
 
-    const server = await prisma.server.findUnique({
-      where: { id },
-      include: {
-        metrics: {
-          take: 100,
-          orderBy: { timestamp: "desc" },
-        },
-        alerts: {
-          where: { status: "ACTIVE" },
-          orderBy: { createdAt: "desc" },
-        },
-        healthChecks: {
-          take: 10,
-          orderBy: { timestamp: "desc" },
-        },
-      },
+    // Fetch metrics, alerts, and health checks for the given server ID
+    const [metrics, alerts, healthChecks] = await Promise.all([
+      prisma.metric.findMany({
+        where: { serverId: id },
+        take: 100,
+        orderBy: { timestamp: "desc" },
+      }),
+      prisma.alert.findMany({
+        where: { serverId: id, status: "ACTIVE" },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.healthCheck.findMany({
+        where: { serverId: id },
+        take: 10,
+        orderBy: { timestamp: "desc" },
+      }),
+    ])
+
+    // Return the combined monitoring data for the server
+    res.json({
+      serverId: id,
+      metrics,
+      alerts,
+      healthChecks,
     })
-
-    if (!server) {
-      return res.status(404).json({ error: "Server not found" })
-    }
-
-    res.json(server)
   } catch (error) {
-    logger.error("Error fetching server:", error)
-    res.status(500).json({ error: "Failed to fetch server" })
+    logger.error("Error fetching monitoring data:", error)
+    res.status(500).json({ error: "Failed to fetch monitoring data" })
   }
 })
 
@@ -220,25 +222,25 @@ router.get("/:id", async (req, res) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.post("/", async (req, res) => {
-  try {
-    const validatedData = createServerSchema.parse(req.body)
+// router.post("/", async (req, res) => {
+//   try {
+//     const validatedData = createServerSchema.parse(req.body)
 
-    const server = await prisma.server.create({
-      data: validatedData,
-    })
+//     const server = await prisma.server.create({
+//       data: validatedData,
+//     })
 
-    logger.info("Server created:", { serverId: server.id, name: server.name })
-    res.status(201).json(server)
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: "Validation failed", details: error.issues })
-    }
+//     logger.info("Server created:", { serverId: server.id, name: server.name })
+//     res.status(201).json(server)
+//   } catch (error) {
+//     if (error instanceof z.ZodError) {
+//       return res.status(400).json({ error: "Validation failed", details: error.issues })
+//     }
 
-    logger.error("Error creating server:", error)
-    res.status(500).json({ error: "Failed to create server" })
-  }
-})
+//     logger.error("Error creating server:", error)
+//     res.status(500).json({ error: "Failed to create server" })
+//   }
+// })
 
 /**
  * @swagger
@@ -288,28 +290,28 @@ router.post("/", async (req, res) => {
  *         $ref: '#/components/responses/NotFound'
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
- */
-router.put("/:id", async (req, res) => {
-  try {
-    const { id } = req.params
-    const validatedData = updateServerSchema.parse(req.body)
+//  */
+// router.put("/:id", async (req, res) => {
+//   try {
+//     const { id } = req.params
+//     const validatedData = updateServerSchema.parse(req.body)
 
-    const server = await prisma.server.update({
-      where: { id },
-      data: validatedData,
-    })
+//     const server = await prisma.server.update({
+//       where: { id },
+//       data: validatedData,
+//     })
 
-    logger.info("Server updated:", { serverId: server.id })
-    res.json(server)
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: "Validation failed", details: error.issues })
-    }
+//     logger.info("Server updated:", { serverId: server.id })
+//     res.json(server)
+//   } catch (error) {
+//     if (error instanceof z.ZodError) {
+//       return res.status(400).json({ error: "Validation failed", details: error.issues })
+//     }
 
-    logger.error("Error updating server:", error)
-    res.status(500).json({ error: "Failed to update server" })
-  }
-})
+//     logger.error("Error updating server:", error)
+//     res.status(500).json({ error: "Failed to update server" })
+//   }
+// })
 
 /**
  * @swagger
@@ -335,20 +337,20 @@ router.put("/:id", async (req, res) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.delete("/:id", async (req, res) => {
-  try {
-    const { id } = req.params
+// router.delete("/:id", async (req, res) => {
+//   try {
+//     const { id } = req.params
 
-    await prisma.server.delete({
-      where: { id },
-    })
+//     await prisma.server.delete({
+//       where: { id },
+//     })
 
-    logger.info("Server deleted:", { serverId: id })
-    res.status(204).send()
-  } catch (error) {
-    logger.error("Error deleting server:", error)
-    res.status(500).json({ error: "Failed to delete server" })
-  }
-})
+//     logger.info("Server deleted:", { serverId: id })
+//     res.status(204).send()
+//   } catch (error) {
+//     logger.error("Error deleting server:", error)
+//     res.status(500).json({ error: "Failed to delete server" })
+//   }
+// })
 
 export { router as serversRouter }

@@ -1,14 +1,20 @@
+// backend/services/monitoring/src/service/metricsCollector.ts
+
 import type { PrismaClient } from "@prisma/client"
 import * as cron from "node-cron"
 import * as si from "systeminformation"
 import { logger } from "../utils/logger"
+import { ServiceClient } from "../../../../shared/utils/serviceClient"
+import type { Server } from "../../../../shared/types"
 
 export class MetricsCollector {
   private prisma: PrismaClient
   private tasks: cron.ScheduledTask[] = []
+  private userService: ServiceClient // New service client
 
   constructor(prisma: PrismaClient) {
     this.prisma = prisma
+    this.userService = new ServiceClient("users") // Initialize the client
   }
 
   start() {
@@ -29,23 +35,25 @@ export class MetricsCollector {
 
   private async collectMetrics() {
     try {
-      const servers = await this.prisma.server.findMany({
-        where: { status: { not: "MAINTENANCE" } },
-      })
+      // Step 1: Get servers from the users service via API call
+      const serverResponse = await this.userService.getAllServers(); // This is a new method you need to add to ServiceClient
+      if (!serverResponse.success || !serverResponse.data) {
+        logger.error("Failed to fetch servers from user service.");
+        return;
+      }
+      const servers:Server[] = serverResponse.data
 
       for (const server of servers) {
-        await this.collectServerMetrics(server.id)
+        await this.collectServerMetrics(server.id); // Pass the server ID to the collection method
       }
     } catch (error) {
-      logger.error("Error collecting metrics:", error)
+      logger.error("Error collecting metrics:", error);
     }
   }
 
   private async collectServerMetrics(serverId: string) {
     try {
-      // For demo purposes, we'll collect local system metrics
-      // In production, you'd collect from remote servers via SSH/agents
-
+      // Step 2: Use the existing logic to collect local metrics
       const [cpu, memory, disk, load] = await Promise.all([si.currentLoad(), si.mem(), si.fsSize(), si.currentLoad()])
 
       const metrics: {
@@ -87,29 +95,20 @@ export class MetricsCollector {
         })
       }
 
-      // Store metrics in database
+      // Store metrics in the now-centralized database, which its Prisma client can access
       await this.prisma.metric.createMany({
         data: metrics,
       })
 
-      // Update server last seen
-      await this.prisma.server.update({
-        where: { id: serverId },
-        data: {
-          lastSeen: new Date(),
-          status: "ONLINE",
-        },
-      })
+      // Step 3: Update server status by calling the users service API
+      await this.userService.updateServerStatus(serverId, "ONLINE") // You need to add this method to ServiceClient
     } catch (error) {
       logger.error(`Error collecting metrics for server ${serverId}:`, error)
 
-      // Mark server as offline if we can't collect metrics
-      await this.prisma.server
-        .update({
-          where: { id: serverId },
-          data: { status: "OFFLINE" },
-        })
-        .catch(() => {}) // Ignore errors when updating status
+      // Mark server as offline if we can't collect metrics via API call
+      await this.userService
+        .updateServerStatus(serverId, "OFFLINE") // Update via API call
+        .catch(() => {})
     }
   }
 }

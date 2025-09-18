@@ -13,11 +13,14 @@ import { AlertManager } from "./service/alertManager"
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger";
 import { EventBus, EventTypes } from "../../../shared/utils/eventBus"
+import {ServiceClient } from "../../../shared/utils/serviceClient"
+
 
 const app = express()
 const port = process.env.PORT || 3002
 const prisma = new PrismaClient()
 const eventBus = EventBus.getInstance("monitoring-service")
+const userService = new ServiceClient("users")
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -62,12 +65,25 @@ async function startServer() {
     alertManager.start()
     logger.info("Alert manager started")
 
-    eventBus.subscribe(EventTypes.SERVER_ADDED, async (event) => {
-        const { serverId } = event.payload
-        logger.info(`Received SERVER_ADDED event for server: ${serverId}. Starting immediate metrics collection.`)
-        await metricsCollector.collectServerMetrics(serverId) 
-      })
+     // Listen for new servers from the user service
+  eventBus.subscribe(EventTypes.SERVER_ADDED, async (data) => {
+    logger.info(`Received SERVER_ADDED event for serverId: ${data.serverId}`)
+    try {
+      // Use the new public method to fetch the server from the user service
+      const serverResponse = await userService.getUserServiceServer(data.serverId)
 
+      if (serverResponse.success && serverResponse.data) {
+        const server = serverResponse.data
+        // Now, you can use the server data to create a new entry
+        // in your local metrics, alerts, and healthChecks tables.
+        logger.info(`Initialized monitoring for new server: ${server.name}`)
+      } else {
+        logger.error(`Failed to fetch server details for serverId ${data.serverId}:`, serverResponse.error)
+      }
+    } catch (error) {
+      logger.error(`Failed to fetch server details for serverId ${data.serverId}:`, error)
+    }
+  })
     app.listen(port, () => {
       logger.info(`Monitoring service running on port ${port}`)
     })

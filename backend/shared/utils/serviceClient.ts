@@ -34,6 +34,22 @@ export class ServiceClient {
     return this.registry.callService("user-service", (client) => client.get(`/api/users/email/${email}`))
   }
 
+  async getAllServers(): Promise<ServiceResponse<Server[]>> {
+    return this.registry.callService("user-service", (client) => client.get(`/api/servers`));
+  }
+  
+   // NEW METHOD to retrieve server from user service
+  async getUserServiceServer(serverId: string): Promise<ServiceResponse<Server>> {
+    return this.registry.callService("user-service", (client) => client.get(`/api/servers/${serverId}`))
+  }
+
+  async updateServerStatus(serverId: string, status: "ONLINE" | "OFFLINE"): Promise<ServiceResponse<Server>> {
+    return this.registry.callService("user-service", (client) =>
+      client.put(`/api/servers/${serverId}`, { status }),
+    )
+  }
+
+
   async verifyToken(token: string): Promise<ServiceResponse<User>> {
     return this.registry.callService("user-service", (client) =>
       client.get("/api/auth/verify", {
