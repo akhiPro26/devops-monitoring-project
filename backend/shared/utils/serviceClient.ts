@@ -27,32 +27,33 @@ export class ServiceClient {
 
   // User Service Methods
   async getUser(userId: string): Promise<ServiceResponse<User>> {
-    return this.registry.callService("user-service", (client) => client.get(`/api/users/${userId}`))
+    return this.registry.callService("user-service", (client) => client.get(`/users/${userId}`))
   }
 
-  async getUserByEmail(email: string): Promise<ServiceResponse<User>> {
-    return this.registry.callService("user-service", (client) => client.get(`/api/users/email/${email}`))
-  }
+  // async getUserByEmail(email: string): Promise<ServiceResponse<User>> {
+  //   return this.registry.callService("user-service", (client) => client.get(`/api/users/email/${email}`))
+  // }
 
   async getAllServers(): Promise<ServiceResponse<Server[]>> {
-    return this.registry.callService("user-service", (client) => client.get(`/api/servers`));
-  }
-  
+  return this.registry.callService("user-service", (client) => client.get(`/servers/inter-service/all-servers`));
+}
+
+
    // NEW METHOD to retrieve server from user service
   async getUserServiceServer(serverId: string): Promise<ServiceResponse<Server>> {
-    return this.registry.callService("user-service", (client) => client.get(`/api/servers/${serverId}`))
+    return this.registry.callService("user-service", (client) => client.get(`/servers//inter-service/server/${serverId}`))
   }
 
   async updateServerStatus(serverId: string, status: "ONLINE" | "OFFLINE"): Promise<ServiceResponse<Server>> {
     return this.registry.callService("user-service", (client) =>
-      client.put(`/api/servers/${serverId}`, { status }),
+      client.put(`/servers/inter-service/server/${serverId}`, { status }),
     )
   }
 
 
   async verifyToken(token: string): Promise<ServiceResponse<User>> {
     return this.registry.callService("user-service", (client) =>
-      client.get("/api/auth/verify", {
+      client.get("/auth/verify", {
         headers: { Authorization: `Bearer ${token}` },
       }),
     )

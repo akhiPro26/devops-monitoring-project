@@ -1,13 +1,16 @@
 import type { AlertType, PrismaClient } from "@prisma/client"
 import * as cron from "node-cron"
 import { logger } from "../utils/logger"
+import { EventBus, EventTypes } from "../../../../shared/utils/eventBus" // Import the EventBus
 
 export class AlertManager {
   private prisma: PrismaClient
   private tasks: cron.ScheduledTask[] = []
+  private eventBus: EventBus // New event bus instance
 
   constructor(prisma: PrismaClient) {
     this.prisma = prisma
+    this.eventBus = EventBus.getInstance("monitoring-service") // Initialize EventBus
   }
 
   start() {
@@ -101,7 +104,7 @@ export class AlertManager {
         })
       } else {
         // Create new alert
-        await this.prisma.alert.create({
+        const newAlert = await this.prisma.alert.create({
           data: {
             serverId: metric.serverId,
             type: this.getAlertType(rule.metricType) as AlertType,
@@ -112,7 +115,16 @@ export class AlertManager {
           },
         })
 
-        logger.warn("Alert created:", {
+        // Step 1: Publish the ALERT_TRIGGERED event
+        this.eventBus.publish(EventTypes.ALERT_TRIGGERED, {
+          alertId: newAlert.id,
+          serverId: metric.serverId,
+          type: newAlert.type,
+          severity: newAlert.severity,
+          message: newAlert.message,
+        })
+        
+        logger.warn("Alert created and event published:", {
           server: metric.server.name,
           type: rule.metricType,
           value: metric.value,

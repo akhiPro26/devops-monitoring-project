@@ -7,6 +7,7 @@ import { errorHandler } from "./middleware/errorHandler"
 import { metricsRouter } from "./routes/metrics"
 import { serversRouter } from "./routes/server"
 import { alertsRouter } from "./routes/alerts"
+import { alertRulesRouter } from "./routes/alertRules"
 import { healthRouter } from "./routes/health"
 import { MetricsCollector } from "./service/metricsCollector"
 import { AlertManager } from "./service/alertManager"
@@ -34,6 +35,7 @@ app.use("/api/metrics", metricsRouter)
 app.use("/api/servers", serversRouter)
 app.use("/api/alerts", alertsRouter)
 app.use("/api/health", healthRouter)
+app.use("/api/alert-rules", alertRulesRouter)
 
 // Health check endpoint
 app.get("/health", (req, res) => {

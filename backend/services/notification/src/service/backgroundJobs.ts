@@ -2,10 +2,71 @@ import cron from "node-cron"
 import { PrismaClient } from "@prisma/client"
 import { logger } from "../util/logger"
 import { addNotificationJob } from "./queueService"
+import { EventBus, EventTypes } from "../../../../shared/utils/eventBus"
 
 const prisma = new PrismaClient()
 
 export function startBackgroundJobs() {
+  const eventBus = EventBus.getInstance("notification-service")
+
+  // Listen for alert events
+  eventBus.subscribe(EventTypes.ALERT_TRIGGERED, async (event) => {
+    try {
+      logger.info("Received ALERT_TRIGGERED event, processing...", { event })
+
+      const { alertId } = event.payload
+      const alert = await prisma.alert.findUnique({
+        where: { id: alertId },
+        include: { server: true },
+      })
+
+      if (!alert) {
+        logger.warn(`Alert with ID ${alertId} not found, skipping notification.`)
+        return
+      }
+
+      // Find all subscriptions for this server and alert type
+      const subscriptions = await prisma.subscription.findMany({
+        where: {
+          serverId: alert.serverId,
+          alertType: alert.type,
+          isActive: true,
+        },
+      })
+
+      if (subscriptions.length === 0) {
+        logger.info(`No active subscriptions found for alert on server ${alert.serverId}`)
+        return
+      }
+
+      for (const subscription of subscriptions) {
+        // Create a notification job for each channel in the subscription
+        for (const channel of subscription.channels) {
+          const notification = await prisma.notification.create({
+            data: {
+              type: "ALERT",
+              title: `New Alert: ${alert.severity} - ${alert.type}`,
+              message: alert.message,
+              recipient: subscription.userId,
+              channelType: channel,
+              priority: alert.severity,
+              metadata: {
+                serverId: alert.serverId,
+                alertId: alert.id,
+              },
+            },
+          })
+
+          await addNotificationJob(notification.id)
+        }
+      }
+
+      logger.info(`Queued notifications for alert ${alertId}`)
+    } catch (error) {
+      logger.error("Error processing ALERT_TRIGGERED event:", error)
+    }
+  })
+
   // Retry failed notifications every 15 minutes
   cron.schedule("*/15 * * * *", async () => {
     try {

@@ -114,4 +114,154 @@ router.get("/", authenticateToken, async (req: AuthRequest, res, next) => {
     }
 })
 
+router.get("/inter-service/all-servers", async (req, res, next) => {
+  try {
+    const servers = await prisma.server.findMany({
+      include: {
+        team: {
+          select: { id: true, name: true },
+        },
+        serverAccess: {
+          select: { permissions: true, userId: true },
+        },
+      },
+    });
+
+    res.json( servers );
+    
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/inter-service/server/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const server = await prisma.server.findUnique({
+      where: { id },
+      include: {
+        team: {
+          select: { id: true, name: true },
+        },
+        serverAccess: {
+          select: { permissions: true, userId: true },
+        },
+      },
+    });
+
+    if (!server) {
+      return res.status(404).json({ error: "Server not found" });
+    }
+
+    res.json({ server });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.put("/inter-service/server/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body as { status: "ONLINE" | "OFFLINE" };
+
+    if (!status || !["ONLINE", "OFFLINE"].includes(status)) {
+      return res.status(400).json({ error: "Invalid status value" });
+    }
+
+    const server = await prisma.server.update({
+      where: { id },
+      data: { status },
+      include: {
+        team: { select: { id: true, name: true } },
+        serverAccess: { select: { permissions: true, userId: true } },
+      },
+    });
+
+    res.json({ message: "Server status updated successfully", server });
+  } catch (error) {
+    // If record doesn't exist, Prisma throws an error
+    if ((error as any).code === "P2025") {
+      return res.status(404).json({ error: "Server not found" });
+    }
+    next(error);
+  }
+});
+
+router.put("/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body as { status: "ONLINE" | "OFFLINE" };
+
+    if (!status || !["ONLINE", "OFFLINE"].includes(status)) {
+      return res.status(400).json({ error: "Invalid status value" });
+    }
+
+    const server = await prisma.server.update({
+      where: { id },
+      data: { status },
+      include: {
+        team: { select: { id: true, name: true } },
+        serverAccess: { select: { permissions: true, userId: true } },
+      },
+    });
+
+    res.json({ message: "Server status updated successfully", server });
+  } catch (error) {
+    // If record doesn't exist, Prisma throws an error
+    if ((error as any).code === "P2025") {
+      return res.status(404).json({ error: "Server not found" });
+    }
+    next(error);
+  }
+});
+
+// Delete server
+router.delete("/:id", authenticateToken, async (req: AuthRequest, res, next) => {
+  try {
+    const { id } = req.params
+
+    // Check if server exists and user has access
+    const server = await prisma.server.findUnique({
+      where: { id },
+      include: {
+        team: {
+          select: { id: true, members: { select: { userId: true } } },
+        },
+        serverAccess: {
+          where: { userId: req.user!.id },
+        },
+      },
+    })
+
+    if (!server) {
+      return res.status(404).json({ error: "Server not found" })
+    }
+
+    // Check if user has permission (either team member or admin access)
+    const isTeamMember = server.team.members.some((m) => m.userId === req.user!.id)
+    const hasAdminAccess = server.serverAccess.some((a) => a.permissions.includes("ADMIN"))
+
+    if (!isTeamMember && !hasAdminAccess) {
+      return res.status(403).json({ error: "You do not have permission to delete this server" })
+    }
+
+    // Delete server
+    await prisma.server.delete({
+      where: { id },
+    })
+
+    // PUBLISH EVENT
+    eventBus.publish(EventTypes.SERVER_DELETED, { serverId: id })
+
+    res.status(204).send()
+  } catch (error) {
+    if ((error as any).code === "P2025") {
+      return res.status(404).json({ error: "Server not found" })
+    }
+    next(error)
+  }
+})
+
+
 export { router as serverRoutes }
