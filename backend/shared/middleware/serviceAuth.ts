@@ -25,7 +25,7 @@ export const authenticateService = (req: ServiceRequest, res: Response, next: Ne
     req.service = decoded
 
     logger.info(`Service authenticated: ${decoded.name}`)
-    next()
+    return next()  // <-- add return here
   } catch (error) {
     logger.error("Service authentication failed:", error)
     return res.status(403).json({
@@ -34,6 +34,7 @@ export const authenticateService = (req: ServiceRequest, res: Response, next: Ne
     })
   }
 }
+
 
 export const requireServicePermission = (permission: string) => {
   return (req: ServiceRequest, res: Response, next: NextFunction) => {
@@ -51,7 +52,7 @@ export const requireServicePermission = (permission: string) => {
       })
     }
 
-    next()
+    return next() // <-- add return here
   }
 }
 

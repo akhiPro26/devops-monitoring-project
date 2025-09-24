@@ -9,12 +9,11 @@ const options: swaggerJSDoc.Options = {
       description: "Swagger docs for AI microservice",
     },
     servers: [
-      {
-        url: "http://localhost:3000", // replace with service URL or env variable
-      },
+      { url: "http://localhost:3000" },
     ],
+    paths: {}, // <-- add this to satisfy TypeScript
   },
-  apis: ["./src/routes/*.ts"], // path to your route files
+  apis: ["./src/routes/*.ts"],
 };
 
 const swaggerSpec = swaggerJSDoc(options);

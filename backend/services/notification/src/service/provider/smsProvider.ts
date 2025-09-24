@@ -57,7 +57,7 @@ export class SMSProvider {
         })
         results.push({ carrier, success: result.success })
       } catch (error) {
-        results.push({ carrier, success: false, error: error.message })
+        results.push({ carrier, success: false, error: error instanceof Error ? error.message : String(error) })
       }
     }
 

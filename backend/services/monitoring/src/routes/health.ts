@@ -411,12 +411,13 @@ router.get("/status/:serverId", async (req, res) => {
       return res.status(404).json({ error: "No health checks found for this server" })
     }
 
-    res.json(latestCheck)
+    return res.json(latestCheck) // <-- add return
   } catch (error) {
     logger.error("Error fetching health status:", error)
-    res.status(500).json({ error: "Failed to fetch health status" })
+    return res.status(500).json({ error: "Failed to fetch health status" }) // <-- add return
   }
 })
+
 
 /**
  * @swagger

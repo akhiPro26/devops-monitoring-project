@@ -38,12 +38,12 @@ export class MetricsCollector {
     try {
       // Step 1: Get servers from the users service via API call
       const serverResponse = await this.userService.getAllServers(); // This is a new method you need to add to ServiceClient
-      // console.log("hello this data is from server = ",serverResponse);
+      console.log("hello this data is from server = ",serverResponse);
       if (!serverResponse) {
         logger.error("Failed to fetch servers from user service.");
         return;
       }
-      const servers:Server[] = serverResponse
+      const servers:any = serverResponse;
 
       for (const server of servers) {
         await this.collectServerMetrics(server.id); // Pass the server ID to the collection method

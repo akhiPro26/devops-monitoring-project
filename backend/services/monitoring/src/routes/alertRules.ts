@@ -19,7 +19,7 @@ const alertRuleSchema = z.object({
     "LOAD_AVERAGE",
     "UPTIME",
   ]),
-  condition: z.string().min(1), // e.g., "greater_than", "less_than"
+  condition: z.string().min(1), 
   threshold: z.number(),
   severity: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
   enabled: z.boolean().default(true),
@@ -55,12 +55,13 @@ router.get("/:id", async (req, res, next) => {
     if (!rule) {
       return res.status(404).json({ error: "Alert rule not found" })
     }
-    res.status(200).json(rule)
+    return res.status(200).json(rule) 
   } catch (error) {
     logger.error(`Error fetching alert rule ${req.params.id}:`, error)
-    next(error)
+    return next(error) 
   }
 })
+
 
 
 router.put("/:id", async (req, res, next) => {

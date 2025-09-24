@@ -13,6 +13,7 @@ const options: swaggerJSDoc.Options = {
         url: "http://localhost:3003", // replace with service URL or env variable
       },
     ],
+    paths: {}, // <-- add this
   },
   apis: ["./src/routes/*.ts"], // path to your route files
 };

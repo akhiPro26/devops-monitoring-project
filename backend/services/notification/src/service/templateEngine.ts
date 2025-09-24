@@ -24,7 +24,11 @@ export class TemplateEngine {
       const compiledTemplate = Handlebars.compile(template)
       return compiledTemplate(data)
     } catch (error) {
-      throw new Error(`Template rendering error: ${error.message}`)
+      if (error instanceof Error) {
+        throw new Error(`Template rendering error: ${error.message}`)
+      } else {
+        throw new Error(`Template rendering error: ${String(error)}`)
+      }
     }
   }
 }

@@ -2,9 +2,9 @@
   "name": "devops-notification-service",
   "version": "1.0.0",
   "description": "Notification Service for DevOps Monitoring Platform",
-  "main": "dist/index.js",
+  "main": "dist/services/notification/src/index.js",
   "scripts": {
-    "start": "node dist/index.js",
+    "start": "node dist/services/notification/src/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
     "prisma:generate": "prisma generate",

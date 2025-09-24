@@ -14,14 +14,15 @@ export function startBackgroundJobs() {
     try {
       logger.info("Received ALERT_TRIGGERED event, processing...", { event })
 
-      const { alertId } = event.payload
-      const alert = await prisma.alert.findUnique({
-        where: { id: alertId },
-        include: { server: true },
-      })
+      // const { alertId } = event.payload
+      const alert = event.payload.alert;
+      // const alert = await prisma.alert.findUnique({
+      //   where: { id: alertId },
+      //   include: { server: true },
+      // })
 
       if (!alert) {
-        logger.warn(`Alert with ID ${alertId} not found, skipping notification.`)
+        logger.warn(`Alert not found, skipping notification.`)
         return
       }
 
@@ -61,7 +62,7 @@ export function startBackgroundJobs() {
         }
       }
 
-      logger.info(`Queued notifications for alert ${alertId}`)
+      logger.info(`Queued notifications for alert ${alert}`)
     } catch (error) {
       logger.error("Error processing ALERT_TRIGGERED event:", error)
     }

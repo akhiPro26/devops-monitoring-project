@@ -2,11 +2,11 @@
   "name": "user-service",
   "version": "1.0.0",
   "description": "User Management Service",
-  "main": "dist/server.js",
+  "main": "dist/services/users/src/server.js",
   "scripts": {
     "dev": "nodemon --exec ts-node src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js",
+    "start": "node dist/services/users/src/server.js",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev"

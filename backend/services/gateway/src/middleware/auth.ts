@@ -14,25 +14,25 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
   try {
     const authHeader = req.headers.authorization
     const token = authHeader && authHeader.split(" ")[1]
-
+    console.log("jwt token = ", token)
     if (!token) {
       return res.status(401).json({
         success: false,
         error: "Access token required",
       })
     }
-
-    // ✅ Verify token using JWT secret
+    
     const secret = process.env.JWT_SECRET
+    console.log("jwt secret = ", secret);
+
     if (!secret) {
       throw new Error("JWT_SECRET not configured in environment variables")
     }
 
     const decoded = jwt.verify(token, secret) as AuthenticatedRequest["user"]
-
-    // Attach user to request
     req.user = decoded
-    next()
+
+    return next() // <-- add return here
   } catch (error: any) {
     return res.status(403).json({
       success: false,
@@ -41,6 +41,7 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
     })
   }
 }
+
 
 export const requireRole = (roles: string[]) => {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -58,6 +59,7 @@ export const requireRole = (roles: string[]) => {
       })
     }
 
-    next()
+    return next() // <-- add return here
   }
 }
+

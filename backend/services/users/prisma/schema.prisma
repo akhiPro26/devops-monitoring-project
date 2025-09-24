@@ -1,1 +1,253 @@
-../../../prisma/schema.prisma
+// This schema serves as the single source of truth for the entire backend.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============ User Service Models ============
+
+model User {
+  id              String         @id @default(cuid())
+  email           String         @unique
+  username        String         @unique
+  password        String
+  firstName       String?
+  lastName        String?
+  role            UserRole       @default(USER)
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  teamMemberships TeamMember[]
+  createdTeams    Team[]         @relation("TeamCreator")
+  sessions        Session[]
+  activityLogs    ActivityLog[]
+  serverAccess    ServerAccess[]
+
+  @@map("users")
+}
+
+model Team {
+  id          String       @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  creatorId   String
+  creator     User         @relation("TeamCreator", fields: [creatorId], references: [id])
+  members     TeamMember[]
+  servers     Server[]
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id       String   @id @default(cuid())
+  role     TeamRole @default(MEMBER)
+  joinedAt DateTime @default(now())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  teamId   String
+  team     Team     @relation(fields: [teamId], references: [id])
+
+  @@unique([userId, teamId])
+  @@map("team_members")
+}
+
+// The consolidated Server model
+model Server {
+  id           String           @id @default(cuid())
+  name         String
+  hostname     String           @unique
+  ipAddress    String
+  environment  Environment      @default(DEVELOPMENT)
+  description  String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  teamId       String
+  team         Team             @relation(fields: [teamId], references: [id])
+  serverAccess ServerAccess[]
+
+  // Consolidated monitoring fields
+  port         Int              @default(22)
+  status       ServerStatus     @default(UNKNOWN)
+  lastSeen     DateTime?
+  metrics      Metric[]
+  alerts       Alert[]
+  healthChecks HealthCheck[]
+
+  @@map("servers")
+}
+
+model ServerAccess {
+  id          String             @id @default(cuid())
+  permissions ServerPermission[]
+  grantedAt   DateTime           @default(now())
+  userId      String
+  user        User               @relation(fields: [userId], references: [id])
+  serverId    String
+  server      Server             @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, serverId])
+  @@map("server_access")
+}
+
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("sessions")
+}
+
+model ActivityLog {
+  id        String    @id @default(cuid())
+  action    String
+  resource  String?
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime  @default(now())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@map("activity_logs")
+}
+
+// ============ Monitoring Service Models ============
+
+model Metric {
+  id        String     @id @default(cuid())
+  serverId  String
+  type      MetricType
+  value     Float
+  unit      String
+  timestamp DateTime   @default(now())
+  server    Server     @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@map("metrics")
+  @@index([serverId, type, timestamp])
+}
+
+model Alert {
+  id          String        @id @default(cuid())
+  serverId    String
+  type        AlertType
+  severity    AlertSeverity
+  message     String
+  threshold   Float?
+  currentValue Float?
+  status      AlertStatus   @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  resolvedAt  DateTime?
+  server      Server        @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@map("alerts")
+}
+
+model HealthCheck {
+  id        String       @id @default(cuid())
+  serverId  String
+  status    HealthStatus
+  response  Json?
+  latency   Int?
+  error     String?
+  timestamp DateTime     @default(now())
+  server    Server       @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@map("health_checks")
+  @@index([serverId, timestamp])
+}
+
+model AlertRule {
+  id          String        @id @default(cuid())
+  name        String
+  metricType  MetricType
+  condition   String
+  threshold   Float
+  severity    AlertSeverity
+  enabled     Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("alert_rules")
+}
+
+// ============ Unified Enums ============
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  USER
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum Environment {
+  DEVELOPMENT
+  STAGING
+  PRODUCTION
+}
+
+enum ServerStatus {
+  ONLINE
+  OFFLINE
+  UNKNOWN
+  MAINTENANCE
+}
+
+enum ServerPermission {
+  READ
+  WRITE
+  ADMIN
+}
+
+enum MetricType {
+  CPU_USAGE
+  MEMORY_USAGE
+  DISK_USAGE
+  NETWORK_IN
+  NETWORK_OUT
+  LOAD_AVERAGE
+  UPTIME
+}
+
+enum AlertType {
+  HIGH_CPU
+  HIGH_MEMORY
+  HIGH_DISK
+  SERVER_DOWN
+  HIGH_LOAD
+  CUSTOM
+}
+
+enum AlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AlertStatus {
+  ACTIVE
+  RESOLVED
+  ACKNOWLEDGED
+}
+
+enum HealthStatus {
+  HEALTHY
+  UNHEALTHY
+  TIMEOUT
+  ERROR
+}

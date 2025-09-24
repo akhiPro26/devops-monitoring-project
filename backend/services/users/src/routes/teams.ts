@@ -15,7 +15,9 @@ const createTeamSchema = z.object({
 
 router.post("/", authenticateToken, async (req: AuthRequest, res, next) => {
     try {
+        
         const { name, description } = createTeamSchema.parse(req.body);
+        console.log("Team created logic hit, team name = ", name, " desc = ", description)
 
         const team = await prisma.team.create({
             data: {

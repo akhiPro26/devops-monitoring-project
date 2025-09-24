@@ -377,16 +377,17 @@ router.get("/", async (req, res) => {
       take: query.limit || 100,
     })
 
-    res.json(metrics)
+    return res.json(metrics)  // <-- add return
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: "Invalid query parameters", details: error.issues })
     }
 
     logger.error("Error fetching metrics:", error)
-    res.status(500).json({ error: "Failed to fetch metrics" })
+    return res.status(500).json({ error: "Failed to fetch metrics" }) // <-- add return
   }
 })
+
 
 /**
  * @swagger

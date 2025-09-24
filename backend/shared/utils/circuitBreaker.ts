@@ -39,7 +39,7 @@ export class CircuitBreaker {
       return result
     } catch (error) {
       this.onFailure()
-      if (fallback && this.state === "OPEN") {
+      if (fallback) {
         logger.warn("Operation failed, executing fallback")
         return await fallback()
       }

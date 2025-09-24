@@ -2,11 +2,11 @@
   "compilerOptions": {
     "target": "es2016",
     "module": "commonjs",
-    "rootDir": "./src",
+    "rootDir": "../..",       // <-- include service + shared
     "outDir": "./dist",
     "esModuleInterop": true,
     "strict": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "../../shared/**/*"],   // <-- include shared
   "exclude": ["node_modules", "dist"]
 }

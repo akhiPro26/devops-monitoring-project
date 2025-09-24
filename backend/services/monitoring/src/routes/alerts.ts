@@ -294,16 +294,17 @@ router.get("/", async (req, res) => {
       take: query.limit || 50,
     })
 
-    res.json(alerts)
+    return res.json(alerts) // <-- add return
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: "Invalid query parameters", details: error.issues })
     }
 
     logger.error("Error fetching alerts:", error)
-    res.status(500).json({ error: "Failed to fetch alerts" })
+    return res.status(500).json({ error: "Failed to fetch alerts" }) // <-- add return
   }
 })
+
 
 /**
  * @swagger
@@ -540,14 +541,14 @@ router.put("/:id", async (req, res) => {
     })
 
     logger.info("Alert updated:", { alertId: alert.id, status: alert.status })
-    res.json(alert)
+    return res.json(alert) // <-- add return
   } catch (error) {
     if (error instanceof z.ZodError) {
       return res.status(400).json({ error: "Validation failed", details: error.issues })
     }
 
     logger.error("Error updating alert:", error)
-    res.status(500).json({ error: "Failed to update alert" })
+    return res.status(500).json({ error: "Failed to update alert" }) // <-- add return
   }
 })
 

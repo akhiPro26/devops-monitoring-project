@@ -2,11 +2,11 @@
   "name": "monitoring-service",
   "version": "1.0.0",
   "description": "DevOps Monitoring Service for server metrics and alerts",
-  "main": "dist/index.js",
+  "main": "dist/services/monitoring/src/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "node dist/services/monitoring/src/index.js",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev"
@@ -20,6 +20,7 @@
     "node-cron": "^4.2.1",
     "prisma": "^6.16.0",
     "swagger-jsdoc": "^6.2.8",
+    "jsonwebtoken": "^9.0.2",
     "swagger-ui-express": "^5.0.1",
     "systeminformation": "^5.27.8",
     "winston": "^3.17.0",

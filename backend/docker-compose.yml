@@ -1,122 +1,213 @@
-version: '3.8'
+version: "3.9"
 
 services:
+  # ----------------------------
   # PostgreSQL Database
+  # ----------------------------
   postgres:
-    image: postgres:15
-    container_name: postgres
+    image: postgres:15-alpine
+    container_name: devops_postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: monitoring_service
     ports:
-      - "5432:5432"
+      - "5433:5432" # host port
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     networks:
       - devops_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d monitoring_service"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
-  # Redis for notification service queues
+  # ----------------------------
+  # Redis
+  # ----------------------------
   redis:
     image: redis:7-alpine
     container_name: devops_redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis_data:/data
     networks:
       - devops_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
+  # ----------------------------
   # User Service
+  # ----------------------------
   user-service:
-    build: ./services/user
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: user-prod
     container_name: user_service
     ports:
       - "3001:3001"
     environment:
-      - DATABASE_URL=postgresql://postgres:password@postgres:5432/user_service
-      - JWT_SECRET=rXet6vh:FM3y6;[
-      - PORT=3001
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/user_service
+      JWT_SECRET: rXet6vh:FM3y6;[
+      PORT: 3001
+      NODE_ENV: production
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - devops_network
+    volumes:
+      - ./services/users/logs:/app/services/users/logs
+    restart: unless-stopped
 
+  # ----------------------------
   # Monitoring Service
+  # ----------------------------
   monitoring-service:
-    build: ./services/monitoring
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: monitoring-prod
     container_name: monitoring_service
     ports:
       - "3002:3002"
     environment:
-      - DATABASE_URL=postgresql://postgres:password@postgres:5432/monitoring_service
-      - USER_SERVICE_URL=http://user-service:3001
-      - PORT=3002
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/monitoring_service
+      USER_SERVICE_URL: http://user-service:3001
+      PORT: 3002
+      NODE_ENV: production
     depends_on:
-      - postgres
-      - user-service
+      postgres:
+        condition: service_healthy
+      user-service:
+        condition: service_started
     networks:
       - devops_network
+    volumes:
+      - ./services/monitoring/logs:/app/services/monitoring/logs
+    restart: unless-stopped
 
+  # ----------------------------
   # AI Service
+  # ----------------------------
   ai-service:
-    build: ./services/ai
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: ai-prod
     container_name: ai_service
     ports:
       - "3003:3003"
+    env_file:
+      - ./services/ai/.env
     environment:
-      - DATABASE_URL=postgresql://postgres:password@postgres:5432/ai_service
-      - GEMINI_API_KEY=your-gemini-api-key
-      - USER_SERVICE_URL=http://user-service:3001
-      - PORT=3003
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/ai_service
+      USER_SERVICE_URL: http://user-service:3001
+      PORT: 3003
+      NODE_ENV: production
     depends_on:
-      - postgres
-      - user-service
+      postgres:
+        condition: service_healthy
+      user-service:
+        condition: service_started
     networks:
       - devops_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3003/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
 
+  # ----------------------------
   # Notification Service
+  # ----------------------------
   notification-service:
-    build: ./services/notification
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: notification-prod
     container_name: notification_service
     ports:
       - "3004:3004"
+    env_file:
+      - ./services/notification/.env
     environment:
-      - DATABASE_URL=postgresql://postgres:password@postgres:5432/notification_service
-      - USER_SERVICE_URL=http://user-service:3001
-      - MONITORING_SERVICE_URL=http://monitoring-service:3002
-      - REDIS_URL=redis://redis:6379
-      - SMTP_HOST=smtp.gmail.com
-      - SMTP_PORT=587
-      - SMTP_SECURE=false
-      - SMTP_USER=your-email@gmail.com
-      - SMTP_PASS=your-app-password
-      - FROM_EMAIL=noreply@yourapp.com
-      - PORT=3004
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/notification_service
+      USER_SERVICE_URL: http://user-service:3001
+      MONITORING_SERVICE_URL: http://monitoring-service:3002
+      REDIS_URL: redis://redis:6379
+      PORT: 3004
+      NODE_ENV: production
     depends_on:
-      - postgres
-      - redis
-      - user-service
-      - monitoring-service
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      monitoring-service:
+        condition: service_started
     networks:
       - devops_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3004/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
 
-  # Nginx Reverse Proxy
-  nginx:
-    image: nginx:alpine
-    container_name: devops_nginx
+  # ----------------------------
+  # Gateway Service
+  # ----------------------------
+  gateway-service:
+    build:
+      context: ./services/gateway
+      dockerfile: Dockerfile
+    container_name: gateway_service
     ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      USER_SERVICE_URL: http://user-service:3001
+      MONITORING_SERVICE_URL: http://monitoring-service:3002
+      AI_SERVICE_URL: http://ai-service:3003
+      NOTIFICATION_SERVICE_URL: http://notification-service:3004
+      REDIS_URL: redis://redis:6379
+      FRONTEND_URL: http://localhost:5173
+      JWT_SECRET: "rXet6vh:FM3y6;["
+      PORT: 3000
     depends_on:
-      - user-service
-      - monitoring-service
-      - ai-service
-      - notification-service
+      redis:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      monitoring-service:
+        condition: service_started
+      ai-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
     networks:
       - devops_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
 volumes:
   postgres_data:

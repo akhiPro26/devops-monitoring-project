@@ -61,6 +61,7 @@ async function startServer() {
 
     // Start metrics collection
     metricsCollector.start()
+    console.log("metrics collector started")
     logger.info("Metrics collector started")
 
     // Start alert monitoring
@@ -69,10 +70,10 @@ async function startServer() {
 
      // Listen for new servers from the user service
   eventBus.subscribe(EventTypes.SERVER_ADDED, async (data) => {
-    logger.info(`Received SERVER_ADDED event for serverId: ${data.serverId}`)
+    logger.info(`Received SERVER_ADDED event for serverId: ${data.payload.serverId}`)
     try {
       // Use the new public method to fetch the server from the user service
-      const serverResponse = await userService.getUserServiceServer(data.serverId)
+      const serverResponse = await userService.getUserServiceServer(data.payload.serverId)
 
       if (serverResponse.success && serverResponse.data) {
         const server = serverResponse.data
@@ -80,10 +81,10 @@ async function startServer() {
         // in your local metrics, alerts, and healthChecks tables.
         logger.info(`Initialized monitoring for new server: ${server.name}`)
       } else {
-        logger.error(`Failed to fetch server details for serverId ${data.serverId}:`, serverResponse.error)
+        logger.error(`Failed to fetch server details for serverId ${data.payload.serverId}:`, serverResponse.error)
       }
     } catch (error) {
-      logger.error(`Failed to fetch server details for serverId ${data.serverId}:`, error)
+      logger.error(`Failed to fetch server details for serverId ${data.payload.serverId}:`, error)
     }
   })
     app.listen(port, () => {
