@@ -2,6 +2,8 @@ import { Router } from "express"
 import { PrismaClient } from "@prisma/client"
 import { z } from "zod"
 import { logger } from "../utils/logger"
+import { authenticateToken, type AuthRequest } from "../middleware/auth"
+
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -695,6 +697,97 @@ router.get("/history/:serverId/:type", async (req, res) => {
   } catch (error) {
     logger.error("Error fetching metric history:", error)
     res.status(500).json({ error: "Failed to fetch metric history" })
+  }
+})
+
+// API call for getting metrics as by user id and team id specific
+
+// Get metrics for user's accessible servers
+router.get("/team", authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const query = metricsQuerySchema.parse(req.query)
+    // console.log("got into team api call ");
+    // Get accessible server IDs
+    const accessibleServers = await prisma.server.findMany({
+      where: {
+        OR: [
+          {
+            team: {
+              members: {
+                some: {
+                  userId: req.user!.id,
+                },
+              },
+            },
+          },
+          {
+            serverAccess: {
+              some: {
+                userId: req.user!.id,
+              },
+            },
+          },
+        ],
+      },
+      select: { id: true },
+    })
+
+    const serverIds = accessibleServers.map(server => server.id)
+
+    if (serverIds.length === 0) {
+      return res.json([])
+    }
+
+    const where: any = {
+      serverId: {
+        in: serverIds,
+      },
+    }
+
+    // Apply additional filters if provided
+    if (query.serverId) {
+      // Only allow if user has access to this specific server
+      if (serverIds.includes(query.serverId)) {
+        where.serverId = query.serverId
+      } else {
+        return res.status(403).json({ error: "Access denied to this server" })
+      }
+    }
+
+    if (query.type) where.type = query.type
+    
+    if (query.from || query.to) {
+      where.timestamp = {}
+      if (query.from) where.timestamp.gte = new Date(query.from)
+      if (query.to) where.timestamp.lte = new Date(query.to)
+    }
+
+    const metrics = await prisma.metric.findMany({
+      where,
+      include: {
+        server: {
+          select: { 
+            id: true, 
+            name: true, 
+            hostname: true,
+            team: {
+              select: { id: true, name: true },
+            },
+          },
+        },
+      },
+      orderBy: { timestamp: "desc" },
+      take: query.limit || 100,
+    })
+
+    return res.json(metrics)
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: "Invalid query parameters", details: error.issues })
+    }
+
+    logger.error("Error fetching team metrics:", error)
+    return res.status(500).json({ error: "Failed to fetch team metrics" })
   }
 })
 

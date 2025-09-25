@@ -1,16 +1,22 @@
 import type { AlertType, PrismaClient } from "@prisma/client"
 import * as cron from "node-cron"
 import { logger } from "../utils/logger"
-import { EventBus, EventTypes } from "../../../../shared/utils/eventBus" // Import the EventBus
+import { EventBus, EventTypes } from "../../../../shared/utils/eventBus"
+import {  RedisEventBus, RedisEventTypes } from "../../../../shared/utils/redisBasedEventBus" // Import the EventBus
+ // Import the EventBus
+
 
 export class AlertManager {
   private prisma: PrismaClient
   private tasks: cron.ScheduledTask[] = []
   private eventBus: EventBus // New event bus instance
+  private redisEventBus: RedisEventBus
 
   constructor(prisma: PrismaClient) {
     this.prisma = prisma
-    this.eventBus = EventBus.getInstance("monitoring-service") // Initialize EventBus
+    this.eventBus = EventBus.getInstance("monitoring-service")
+    this.redisEventBus = RedisEventBus.getInstance("monitoring-service") // Initialize EventBus
+     // Initialize EventBus
   }
 
   start() {
@@ -70,6 +76,7 @@ export class AlertManager {
   }
 
   private evaluateCondition(value: number, condition: string, threshold: number): boolean {
+    // console.log(value, condition, threshold)
     switch (condition) {
       case "greater_than":
         return value > threshold
@@ -117,6 +124,14 @@ export class AlertManager {
 
         // Step 1: Publish the ALERT_TRIGGERED event
         this.eventBus.publish(EventTypes.ALERT_TRIGGERED, {
+          alertId: newAlert.id,
+          serverId: metric.serverId,
+          type: newAlert.type,
+          severity: newAlert.severity,
+          message: newAlert.message,
+        })
+
+        this.redisEventBus.publish(RedisEventTypes.ALERT_TRIGGERED, {
           alertId: newAlert.id,
           serverId: metric.serverId,
           type: newAlert.type,

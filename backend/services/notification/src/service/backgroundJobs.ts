@@ -3,15 +3,21 @@ import { PrismaClient } from "@prisma/client"
 import { logger } from "../util/logger"
 import { addNotificationJob } from "./queueService"
 import { EventBus, EventTypes } from "../../../../shared/utils/eventBus"
+import { RedisEventBus, RedisEventTypes } from "../../../../shared/utils/redisBasedEventBus"
+import { serve } from "swagger-ui-express"
+
 
 const prisma = new PrismaClient()
 
 export function startBackgroundJobs() {
   const eventBus = EventBus.getInstance("notification-service")
+  const redisEventBus = RedisEventBus.getInstance("notification-service")
+
 
   // Listen for alert events
   eventBus.subscribe(EventTypes.ALERT_TRIGGERED, async (event) => {
     try {
+      console.log("Hello from background Job ###########")
       logger.info("Received ALERT_TRIGGERED event, processing...", { event })
 
       // const { alertId } = event.payload
@@ -34,6 +40,73 @@ export function startBackgroundJobs() {
           isActive: true,
         },
       })
+
+      if (subscriptions.length === 0) {
+        logger.info(`No active subscriptions found for alert on server ${alert.serverId}`)
+        return
+      }
+
+      for (const subscription of subscriptions) {
+        // Create a notification job for each channel in the subscription
+        for (const channel of subscription.channels) {
+          const notification = await prisma.notification.create({
+            data: {
+              type: "ALERT",
+              title: `New Alert: ${alert.severity} - ${alert.type}`,
+              message: alert.message,
+              recipient: subscription.userId,
+              channelType: channel,
+              priority: alert.severity,
+              metadata: {
+                serverId: alert.serverId,
+                alertId: alert.id,
+              },
+            },
+          })
+
+          await addNotificationJob(notification.id)
+        }
+      }
+
+      logger.info(`Queued notifications for alert ${alert}`)
+    } catch (error) {
+      logger.error("Error processing ALERT_TRIGGERED event:", error)
+    }
+  })
+
+  redisEventBus.subscribe(RedisEventTypes.ALERT_TRIGGERED, async (event) => {
+    try {
+      console.log("Hello from background Job ###########")
+      logger.info("Received ALERT_TRIGGERED event, processing...", { event })
+
+      // const { alertId } = event.payload
+      const alert = event.payload;
+      console.log(event)
+      console.log(event.payload)
+      // const alert = await prisma.alert.findUnique({
+      //   where: { id: alertId },
+      //   include: { server: true },
+      // })
+
+      if (!alert) {
+        logger.warn(`Alert not found, skipping notification.`)
+        return
+      }
+      const allSubscriptions = await prisma.subscription.findMany()
+
+      console.log("all subs - ",allSubscriptions)
+      console.log("serverId = ", alert.serverId)
+      console.log("alertType = ", alert.type);
+      // Find all subscriptions for this server and alert type
+      const subscriptions = await prisma.subscription.findMany({
+        where: {
+          serverId: alert.serverId,
+          alertType: alert.type,
+          isActive: true,
+        },
+      })
+      console.log(subscriptions);
+
 
       if (subscriptions.length === 0) {
         logger.info(`No active subscriptions found for alert on server ${alert.serverId}`)

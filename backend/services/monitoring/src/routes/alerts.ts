@@ -2,6 +2,7 @@ import { Router } from "express"
 import { PrismaClient } from "@prisma/client"
 import { z } from "zod"
 import { logger } from "../utils/logger"
+import { authenticateToken, type AuthRequest } from "../middleware/auth"
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -567,5 +568,159 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to delete alert" })
   }
 })
+
+// please copy middlerware from user's for token auth and userId
+// API calls for teamId basis fetching of alerts
+// / Get detailed alerts for user's accessible servers
+router.get("/team", authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const query = alertsQuerySchema.parse(req.query)
+
+    // Get accessible server IDs
+    const accessibleServers = await prisma.server.findMany({
+      where: {
+        OR: [
+          {
+            team: {
+              members: {
+                some: {
+                  userId: req.user!.id,
+                },
+              },
+            },
+          },
+          {
+            serverAccess: {
+              some: {
+                userId: req.user!.id,
+              },
+            },
+          },
+        ],
+      },
+      select: { id: true },
+    })
+
+    const serverIds = accessibleServers.map(server => server.id)
+
+    if (serverIds.length === 0) {
+      return res.json([])
+    }
+
+    const where: any = {
+      serverId: {
+        in: serverIds,
+      },
+    }
+
+    // Apply additional filters if provided
+    if (query.serverId) {
+      // Only allow if user has access to this specific server
+      if (serverIds.includes(query.serverId)) {
+        where.serverId = query.serverId
+      } else {
+        return res.status(403).json({ error: "Access denied to this server" })
+      }
+    }
+    
+    if (query.status) where.status = query.status
+    if (query.severity) where.severity = query.severity
+
+    const alerts = await prisma.alert.findMany({
+      where,
+      include: {
+        server: {
+          select: { 
+            id: true, 
+            name: true, 
+            hostname: true,
+            team: {
+              select: { id: true, name: true },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: query.limit || 50,
+    })
+
+    res.json(alerts)
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: "Invalid query parameters", details: error.issues })
+    }
+
+    logger.error("Error fetching team alerts:", error)
+    res.status(500).json({ error: "Failed to fetch team alerts" })
+  }
+})
+
+
+// Get active alerts summary for user's accessible servers
+router.get("/active/team", authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    // First get all server IDs that the user has access to
+    const accessibleServers = await prisma.server.findMany({
+      where: {
+        OR: [
+          {
+            team: {
+              members: {
+                some: {
+                  userId: req.user!.id,
+                },
+              },
+            },
+          },
+          {
+            serverAccess: {
+              some: {
+                userId: req.user!.id,
+              },
+            },
+          },
+        ],
+      },
+      select: { id: true },
+    })
+
+    const serverIds = accessibleServers.map(server => server.id)
+
+    if (serverIds.length === 0) {
+      return res.json({
+        total: 0,
+        critical: 0,
+        high: 0,
+        medium: 0,
+        low: 0,
+      })
+    }
+
+    const alertCounts = await prisma.alert.groupBy({
+      by: ["severity"],
+      where: { 
+        status: "ACTIVE",
+        serverId: {
+          in: serverIds,
+        },
+      },
+      _count: { id: true },
+    })
+
+    const summary = {
+      total: alertCounts.reduce((sum, item) => sum + item._count.id, 0),
+      critical: alertCounts.find((item) => item.severity === "CRITICAL")?._count.id || 0,
+      high: alertCounts.find((item) => item.severity === "HIGH")?._count.id || 0,
+      medium: alertCounts.find((item) => item.severity === "MEDIUM")?._count.id || 0,
+      low: alertCounts.find((item) => item.severity === "LOW")?._count.id || 0,
+    }
+
+    res.json(summary)
+  } catch (error) {
+    logger.error("Error fetching team active alerts:", error)
+    res.status(500).json({ error: "Failed to fetch team active alerts" })
+  }
+})
+
 
 export { router as alertsRouter }
